@@ -1,0 +1,10 @@
+.\object\button.o: ..\GUI_DRV\src\button.c
+.\object\button.o: ..\GUI_DRV\interface\button.h
+.\object\button.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\object\button.o: ..\GUI_DRV\interface\gui_config.h
+.\object\button.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
+.\object\button.o: ..\GUI_DRV\interface\gui_basic.h
+.\object\button.o: ..\GUI_DRV\interface\lcmdrv.h
+.\object\button.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+.\object\button.o: ..\BSP\inc\bsp_timer.h
+.\object\button.o: ..\GUI_DRV\interface\text.h

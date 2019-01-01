@@ -1,0 +1,11 @@
+.\object\messagebox.o: ..\GUI_DRV\src\messagebox.c
+.\object\messagebox.o: ..\GUI_DRV\interface\messagebox.h
+.\object\messagebox.o: ..\GUI_DRV\interface\gui_config.h
+.\object\messagebox.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\object\messagebox.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
+.\object\messagebox.o: ..\GUI_DRV\interface\gui_basic.h
+.\object\messagebox.o: ..\GUI_DRV\interface\lcmdrv.h
+.\object\messagebox.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+.\object\messagebox.o: ..\GUI_DRV\interface\button.h
+.\object\messagebox.o: ..\BSP\inc\bsp_timer.h
+.\object\messagebox.o: ..\GUI_DRV\interface\text.h
