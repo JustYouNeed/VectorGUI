@@ -58,7 +58,7 @@
 /*  按键结构体  */
 typedef struct 
 {
-	uint8_t Fifo[KEY_FIFO_SIZE];
+	uint16_t Fifo[KEY_FIFO_SIZE];
 	uint8_t Read;
 	uint8_t Write;
 }keyFIFO_t;
@@ -228,11 +228,11 @@ void bsp_key_SetPara(uint8_t keyId, uint16_t longTime, uint16_t repeatSpeed)
 * Note(s)    : None.
 *********************************************************************************************************
 */
-uint8_t bsp_key_GetKey(void)
+uint16_t bsp_key_GetKey(void)
 {
 	if(!isInit) return 0;
 	
-	uint8_t key;
+	uint16_t key;
 	if(keyFifo.Read == keyFifo.Write) 
 	{
 		return KEY_NONE;
@@ -258,7 +258,7 @@ uint8_t bsp_key_GetKey(void)
 * Note(s)    : None.
 *********************************************************************************************************
 */
-void bsp_key_PutKey(uint8_t keyValue)
+void bsp_key_PutKey(uint16_t keyValue)
 {
 	keyFifo.Fifo[keyFifo.Write] = keyValue;
 	
@@ -325,7 +325,6 @@ void bsp_key_Detect(uint8_t keyId)
 	/*  判断是否按下  */
 	if(bsp_key_IsPress(keyId))
 	{
-		
 		if(pKey->filterCount < KEY_FILTER_TIME) 
 			pKey->filterCount  = KEY_FILTER_TIME;
 		else if(pKey->filterCount < 2 * KEY_FILTER_TIME) 
@@ -338,7 +337,7 @@ void bsp_key_Detect(uint8_t keyId)
 				pKey->state = 1;
 				
 				/*  推送按键值到按键FIFO  */
-				bsp_key_PutKey((uint8_t)(3 * keyId + 1));
+				bsp_key_PutKey((uint16_t)((keyId << 8) + 1));
 			}
 			
 			/*  长按时间大于零,说明开启了长按检测功能  */
@@ -350,7 +349,7 @@ void bsp_key_Detect(uint8_t keyId)
 					if(++pKey->longCount == pKey->longTime)
 					{
 						/*  推送长按消息到按键FIFO  */
-						bsp_key_PutKey((uint8_t)(3 * keyId + 3));
+						bsp_key_PutKey((uint16_t)((keyId << 8) + 3));
 					}
 				}
 				else	/*  如果已经超过了长按时间,则看看是否开启了按键连发  */
@@ -361,7 +360,7 @@ void bsp_key_Detect(uint8_t keyId)
 						if(++pKey->repeatCount >= pKey->repeatSpeed)
 						{
 							pKey->repeatCount = 0;
-							bsp_key_PutKey((uint8_t)(3 * keyId + 1));
+							bsp_key_PutKey((uint16_t)((keyId << 8) + 1));
 						}
 					}
 				}
@@ -379,7 +378,7 @@ void bsp_key_Detect(uint8_t keyId)
 			if(pKey->state == 1)
 			{
 				pKey->state = 0;
-				bsp_key_PutKey((uint8_t)(3 * keyId + 2));
+				bsp_key_PutKey((uint16_t)((keyId << 8) + 2));
 			}
 		}
 		

@@ -17,11 +17,12 @@
 # define __GUI_PROGBAR_H
 
 # define PROGBAR_Handle	int16_t
+typedef struct PROGBAR_OBJ PROGBAR_OBJ;
 
-typedef struct 
+struct PROGBAR_OBJ
 {
 	GUI_RECT rect;
-}PROGBAR_OBJ;
+};
 
 void progbar_onPaint(const PROGBAR_OBJ* pProgbar);
 

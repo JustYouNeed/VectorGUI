@@ -38,13 +38,18 @@
 * Note(s)    : None.
 *********************************************************************************************************
 */
-GUI_ERROR widget_getWidget(WIDGET_HANDLE hWidget, WIDGET_OBJ *pWidget)
+WIDGET_OBJ *widget_getWidget(WIDGET_HANDLE hWidget, int16_t *err)
 {
-	if(!hWidget) return ERR_PARA;	/* 参数错误 */
+	if(!hWidget) 
+	{
+		*err = ERR_PARA;
+		return NULL;	/* 参数错误 */
+	}
 	
 	WM_OBJ *pWin = NULL;
-
-	wm_getWindowObject(hWidget>>8, pWin);	/* 得到该控件的父窗口 */
+	WIDGET_OBJ *pWidget = NULL;
+	
+	pWin = wm_getWindowObject(GUI_GET_HPARENT(hWidget), err);	/* 得到该控件的父窗口 */
 	if(!pWin || !pWin->pWidget) return NULL;	/* 获取父窗口失败或者该窗口下没有控件都返回失败 */
 	
 	/* 查找控件 */
@@ -56,11 +61,10 @@ GUI_ERROR widget_getWidget(WIDGET_HANDLE hWidget, WIDGET_OBJ *pWidget)
 		
 		pWidget = pWidget->pNext;
 	}
-	
-	return (pWidget)?(ERR_NONE):(ERR_PARA);
+	*err = ERR_NONE;
+	return pWidget;
 		
 }
-
 
 /*
 *********************************************************************************************************
@@ -77,10 +81,11 @@ GUI_ERROR widget_getWidget(WIDGET_HANDLE hWidget, WIDGET_OBJ *pWidget)
 * Note(s)    : None.
 *********************************************************************************************************
 */
-WIDGET_HANDLE widget_Create(WIDGET_TYPE widgetType, void *pObj, uint8_t id, WM_HWIN hParent)
+WIDGET_HANDLE widget_Create(WIDGET_TYPE widgetType, void *pObj, uint8_t id, uint16_t actKey, WIDGET_CALLBACK *_cb, WM_HWIN hParent)
 {
 	WIDGET_OBJ *pWidget = NULL, *widgetTemp = NULL;
-	WM_OBJ *pWin = NULL;
+	WM_OBJ *pWin;
+	int16_t err = ERR_NONE;
 	
 	if(!hParent) return 0;
 	if(!pObj) return 0;
@@ -90,22 +95,25 @@ WIDGET_HANDLE widget_Create(WIDGET_TYPE widgetType, void *pObj, uint8_t id, WM_H
 	if(!pWidget) return 0;
 	
 	pWidget->type = widgetType;
-	pWidget->id = (hParent << 8 | id);
+	pWidget->id = ((hParent << 10) | (widgetType << 6) | (id << 0));
 	pWidget->pNext = NULL;
+	pWidget->actKey = actKey;
+	pWidget->_cb = _cb;
 	
-	/* 根据控件类型设置控件数据区 */
-	switch(widgetType)
-	{
-		case WIDGET_BUTTON:pWidget->widgetData = (BUTTON_OBJ*)pObj;	break;
-		case WIDGET_CHECKBOX: pWidget->widgetData = (CHECKBOX_OBJ*)pObj;	break;
-		case WIDGET_MENU:pWidget->widgetData = (MENU_OBJ*)pObj;	break;
-		case WIDGET_PROGBAR:pWidget->widgetData = (PROGBAR_OBJ*)pObj;	break;
-		case WIDGET_SCROLLBAR:pWidget->widgetData = (SCROLLBAR_OBJ*)pObj;	break;
-		case WIDGET_WINDOW:pWidget->widgetData = (WINDOW_OBJ*)pObj;	break;
-	}
+	pWidget->widgetData = (void *)pObj;
+//	/* 根据控件类型设置控件数据区 */
+//	switch(widgetType)
+//	{
+//		case WIDGET_BUTTON:pWidget->widgetData = (BUTTON_OBJ*)pObj;	break;
+//		case WIDGET_CHECKBOX: pWidget->widgetData = (CHECKBOX_OBJ*)pObj;	break;
+//		case WIDGET_MENU:pWidget->widgetData = (MENU_OBJ*)pObj;	break;
+//		case WIDGET_PROGBAR:pWidget->widgetData = (PROGBAR_OBJ*)pObj;	break;
+//		case WIDGET_SCROLLBAR:pWidget->widgetData = (SCROLLBAR_OBJ*)pObj;	break;
+//		case WIDGET_WINDOW:pWidget->widgetData = (WINDOW_OBJ*)pObj;	break;
+//	}
 		
 	/* 将控件挂载到窗口上 */
-	wm_getWindowObject(hParent, pWin);	/* 得到父窗口的结构体指针 */
+	pWin = wm_getWindowObject(hParent, &err);	/* 得到父窗口的结构体指针 */
 	if(pWin->pWidget == NULL)	/* 如果该窗口当前没有控件,就挂接该控件 */
 	{
 		pWin->pWidget = pWidget;
@@ -129,25 +137,26 @@ WIDGET_HANDLE widget_Create(WIDGET_TYPE widgetType, void *pObj, uint8_t id, WM_H
 *
 * Description: 删除一个控件
 *             
-* Arguments  : *hWidget: 要删除的控件句柄指针
+* Arguments  : hWidget: 要删除的控件句柄
 *
 * Reutrn     : 返回值见gui_types.h中定义
 *
 * Note(s)    : 删除成功为控件句柄会清零
 *********************************************************************************************************
 */
-GUI_ERROR widget_Delete(WIDGET_HANDLE *hWidget)
+GUI_ERROR widget_Delete(WIDGET_HANDLE hWidget)
 {
 	WIDGET_OBJ *preObj	= NULL, *lstObj = NULL;
 	WM_OBJ *pObj = NULL;
+	int16_t err = ERR_NONE;
 	
 	/* 获取该控件的父窗口 */
-	wm_getWindowObject(*hWidget >> 8, pObj);
+	pObj = wm_getWindowObject(hWidget >> 10, &err);
 	if(!pObj) return ERR_PARA;
 	lstObj = preObj = pObj->pWidget;
 	
 	/* 如果是第一个控件 */
-	if(preObj->id == *hWidget)	
+	if(preObj->id == hWidget)	
 	{
 		pObj->pWidget = preObj->pNext;	/* 从链表中删除 */
 	}
@@ -156,7 +165,7 @@ GUI_ERROR widget_Delete(WIDGET_HANDLE *hWidget)
 		lstObj = preObj->pNext;
 		while(lstObj)
 		{
-			if(lstObj->id == *hWidget)
+			if(lstObj->id == hWidget)
 			{
 				preObj->pNext = lstObj->pNext;
 				break;
@@ -171,7 +180,6 @@ GUI_ERROR widget_Delete(WIDGET_HANDLE *hWidget)
 	{
 		bsp_mem_Free(SRAMIN, lstObj->widgetData);	/* 释放控件数据 */
 		bsp_mem_Free(SRAMIN, lstObj);
-		*hWidget = 0;
 	}
 	
 	return ERR_NONE;
@@ -192,42 +200,42 @@ GUI_ERROR widget_Delete(WIDGET_HANDLE *hWidget)
 */
 void widget_onPaint(const struct WIDGET_OBJ *pWidget)
 {
-	if(!pWidget) return ;
-	
-	/* 根据控件类型选择不同的绘制函数 */
-	switch(pWidget->type)
-	{
-		case WIDGET_BUTTON: 	/* 按钮 */
-		{
-			BUTTON_OBJ *pButton = (BUTTON_OBJ*)(pWidget->widgetData);	/* 得到按键结构体 */
-			button_onPaint(pButton);		/* 绘制按键 */
-		}break;
-		case WIDGET_CHECKBOX:
-		{
-			CHECKBOX_OBJ *pCheckbox = (CHECKBOX_OBJ *)(pWidget->widgetData);
-			checkbox_onPaint(pCheckbox);
-		}break;
-		case WIDGET_MENU:
-		{
-			MENU_OBJ *pMenu = (MENU_OBJ *)(pWidget->widgetData);
-			menu_onPaint(pMenu);
-		}break;
-		case WIDGET_PROGBAR:
-		{
-			PROGBAR_OBJ *pProgbar = (PROGBAR_OBJ *)(pWidget->widgetData);
-			progbar_onPaint(pProgbar);
-		}break;
-		case WIDGET_SCROLLBAR:
-		{
-			SCROLLBAR_OBJ *pScrollbar = (SCROLLBAR_OBJ *)(pWidget->widgetData);
-			scrollbar_onPaint(pScrollbar);
-		}break;
-		case WIDGET_WINDOW:		/* window控件 */
-		{
-			WINDOW_OBJ *pWindow = (WINDOW_OBJ *)(pWidget->widgetData);
-			window_onPaint(pWindow);
-		}break;
-	}
+//	if(!pWidget) return ;
+//	
+//	/* 根据控件类型选择不同的绘制函数 */
+//	switch(pWidget->type)
+//	{
+//		case WIDGET_BUTTON: 	/* 按钮 */
+//		{
+//			BUTTON_OBJ *pButton = (BUTTON_OBJ*)(pWidget->widgetData);	/* 得到按键结构体 */
+////			button_onPaint(pButton);		/* 绘制按键 */
+//		}break;
+//		case WIDGET_CHECKBOX:
+//		{
+//			CHECKBOX_OBJ *pCheckbox = (CHECKBOX_OBJ *)(pWidget->widgetData);
+//			checkbox_onPaint(pCheckbox);
+//		}break;
+//		case WIDGET_MENU:
+//		{
+//			MENU_OBJ *pMenu = (MENU_OBJ *)(pWidget->widgetData);
+//			menu_onPaint(pMenu);
+//		}break;
+//		case WIDGET_PROGBAR:
+//		{
+//			PROGBAR_OBJ *pProgbar = (PROGBAR_OBJ *)(pWidget->widgetData);
+//			progbar_onPaint(pProgbar);
+//		}break;
+//		case WIDGET_SCROLLBAR:
+//		{
+//			SCROLLBAR_OBJ *pScrollbar = (SCROLLBAR_OBJ *)(pWidget->widgetData);
+//			scrollbar_onPaint(pScrollbar);
+//		}break;
+//		case WIDGET_WINDOW:		/* window控件 */
+//		{
+//			WINDOW_OBJ *pWindow = (WINDOW_OBJ *)(pWidget->widgetData);
+//			window_onPaint(pWindow);
+//		}break;
+//	}
 }
 
 /********************************************  END OF FILE  *******************************************/

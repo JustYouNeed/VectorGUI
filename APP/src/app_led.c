@@ -53,9 +53,10 @@ void task_LEDTask(void *p_arg)
 	while(1)
 	{
 		bsp_led_Thread();
-//		bsp_key_Scan();
-//		
-//		if(bsp_key_GetKey() == KEY_D_PRESS)
+		bsp_key_Scan();
+		gui_keyInput();
+		
+//		if(bsp_key_GetKey() == KEY_RIGHT_PRESS)
 //			bsp_led_Toggle(LED_RED);
 		vTaskDelayUntil(&xLastWakeTime, xPeriod);
 	}

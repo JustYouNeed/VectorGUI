@@ -17,11 +17,12 @@
 # define __GUI_SCROLLBAR_H
 
 # define SCROLLBAR_Handle	int16_t
+typedef struct SCROLLBAR_OBJ SCROLLBAR_OBJ;
 
-typedef struct
+struct SCROLLBAR_OBJ
 {
 	GUI_RECT rect;
-}SCROLLBAR_OBJ;
+};
 
 void scrollbar_onPaint(const SCROLLBAR_OBJ *pScrollbar);
 

@@ -26,13 +26,13 @@
 */
 static uint16_t wm_NumWindows = 0;
 static uint16_t wm_HWIN = 0;
-static WM_HWIN hDesk = 0;
-static WM_OBJ *WM_Desktop = NULL;
+WM_HWIN hDesk = 0;
+WM_OBJ *WM_Desktop = NULL;
 
 
 /*
 *********************************************************************************************************
-*                                          
+*                              wm_addWindowToList            
 *
 * Description: 
 *             
@@ -51,7 +51,7 @@ static WM_HWIN wm_addWindowToList(WM_OBJ *pWin)
 	{
 		pWin->pNext = WM_Desktop;
 		WM_Desktop = pWin;
-		
+		hDesk = WM_Desktop->hWin;
 		//发送重绘消息
 	}
 	else	/* 不需要立即显示则挂到第二个位置 */
@@ -68,20 +68,25 @@ static WM_HWIN wm_addWindowToList(WM_OBJ *pWin)
 *********************************************************************************************************
 *                      wm_getWindowObject                    
 *
-* Description: 
+* Description: 获取窗口管理器结构体
 *             
-* Arguments  : 
+* Arguments  : hWin: 窗口管理器句柄
+*							 *pObj: 窗口管理器结构体指针
 *
-* Reutrn     : 
+* Reutrn     : 函数执行结果,相关定义看gui_types.h中的定义
 *
-* Note(s)    : 
+* Note(s)    : None.
 *********************************************************************************************************
 */
-GUI_ERROR wm_getWindowObject(WM_HWIN hWin, WM_OBJ *pObj)
-{
-	pObj = WM_Desktop;
+WM_OBJ *wm_getWindowObject(WM_HWIN hWin, int16_t *err)
+{	
+	if(!hWin) 
+	{
+		*err = ERR_PARA;
+		return NULL;
+	}
 	
-	if(!hWin) return ERR_PARA;
+	WM_OBJ *pObj = WM_Desktop;
 	
 	/* 查找链表 */
 	while(pObj)
@@ -90,19 +95,19 @@ GUI_ERROR wm_getWindowObject(WM_HWIN hWin, WM_OBJ *pObj)
 		pObj = pObj->pNext;
 	}
 	
-	return ERR_NONE;
+	return pObj;
 }
 /*
 *********************************************************************************************************
-*                                          
+*                     wm_Init                     
 *
-* Description: 
+* Description: 窗口管理器初始化,至少得有一个窗口管理器
 *             
-* Arguments  : 
+* Arguments  : None.
 *
-* Reutrn     : 
+* Reutrn     : None.
 *
-* Note(s)    : 
+* Note(s)    : None.
 *********************************************************************************************************
 */
 void wm_Init(void)
@@ -114,13 +119,15 @@ void wm_Init(void)
 *********************************************************************************************************
 *                         wm_createWindow                 
 *
-* Description: 创建一个窗口
+* Description: 创建一个窗口管理器
 *             
-* Arguments  : 
+* Arguments  : x0, y0: 窗口管理器的起始坐标
+*							 width, height: 窗口管理器的长宽
+*					     status: 刚创建时窗口管理器的状态
 *
-* Reutrn     : 
+* Reutrn     : 窗口管理器的句柄
 *
-* Note(s)    : 
+* Note(s)    : None.
 *********************************************************************************************************
 */
 WM_HWIN	wm_Create(uint16_t x0, uint16_t y0, uint16_t width, uint16_t height, uint16_t status)
@@ -145,6 +152,9 @@ WM_HWIN	wm_Create(uint16_t x0, uint16_t y0, uint16_t width, uint16_t height, uin
 	wm_NumWindows++;		/* 窗口数量增加 */
 	wm_HWIN++;
 	pWin->hWin = wm_HWIN;	/* 设置窗口句柄 */
+	
+	/* 向窗口发送创建消息 */
+	msg_sendMsgNoData(pWin->hWin, MSG_CREATE);
 	
 	return pWin->hWin;	/* 返回窗口编号 */
 }
@@ -195,7 +205,7 @@ GUI_ERROR wm_Delete(WM_HWIN *hWin)
 	{
 		if(lstObj->pWidget)	/* 需要先删除该窗口下的控件 */
 		{
-			widget_Delete(&(lstObj->pWidget->id));	/*删除该窗口下的控件 */
+			widget_Delete(lstObj->pWidget->id);	/*删除该窗口下的控件 */
 		}
 		bsp_mem_Free(SRAMIN, lstObj);	/* 释放内存 */
 		*hWin = 0;
@@ -218,32 +228,73 @@ GUI_ERROR wm_Delete(WM_HWIN *hWin)
 * Note(s)    : None.
 *********************************************************************************************************
 */
-void wm_pocess(void)
+void wm_onPaint(void)
 {
-	WM_OBJ *pWin = NULL;
+	if(WM_Desktop == NULL) return ;
+	
 	struct WIDGET_OBJ *pWidget = NULL;
 	
-	pWin = WM_Desktop;	/* 获取窗口链表表头 */
-		
-	if(pWin == NULL) return ;	/* 表头为空的话直接返回 */
+//	gui_clear();
 	
-	gui_clear();
-	
-//	while(pWin)	/* 重绘整个窗口链表 */
-//	{
-		if(pWin->pWidget)	/* 如果该窗口下面存在控件，则需要绘制控件 */
+	/* 只绘制桌面 */
+	if(WM_Desktop->pWidget)	/* 如果该窗口下面存在控件，则需要绘制控件 */
+	{
+		pWidget = WM_Desktop->pWidget;	/* 获取控件链表表头 */
+		while(pWidget)		/* 遍历该窗口的控件,并重绘 */
 		{
-			pWidget = pWin->pWidget;	/* 获取控件链表表头 */
-			while(pWidget)		/* 遍历该窗口的控件,并重绘 */
-			{
-				widget_onPaint(pWidget);
-				pWidget = (struct WIDGET_OBJ *)(pWidget->pNext);	/* 获取下一个控件 */
-			}
+			msg_sendMsgNoData(pWidget->id, MSG_PAINT);
+//			widget_onPaint(pWidget);
+			pWidget = (struct WIDGET_OBJ *)(pWidget->pNext);	/* 获取下一个控件 */
 		}
-//		pWin = pWin->pNext;		/* 得到下一个窗口结构体 */
-//	}
+	}
+//	gui_Refresh();	/* 更新屏幕 */
+}
+
+/*
+*********************************************************************************************************
+*                            wm_defaultProc              
+*
+* Description: WM的默认消息处理函数
+*             
+* Arguments  : 
+*
+* Reutrn     : 
+*
+* Note(s)    : 
+*********************************************************************************************************
+*/
+void wm_defaultProc(WM_MESSAGE *pMsg)
+{
+	WM_HWIN hWin = pMsg->hWin;
+	const void *p = pMsg->data.p;
+	int16_t err = ERR_NONE;
 	
-	gui_Refresh();	/* 更新屏幕 */
+	WM_OBJ *pWin = wm_getWindowObject(hWin, &err);
+	
+	switch(pMsg->msgId)
+	{
+		case MSG_KEY: 	/* 如下是按键按下的消息，则通知响应该按键的控件 */
+		{
+			WIDGET_OBJ *pObj = pWin->pWidget;	/* 先获取控件链表头 */
+			while(pObj)	/* 循环通知每一个控件 */
+			{
+				if(pObj->actKey & pMsg->data.v)	/* 如果该是该控件会响应的按键类型则响应 */
+				{
+					if(pObj->_cb)
+						pObj->_cb(pMsg);
+				}
+				pObj = pObj->pNext;
+			}
+		}break;
+		case MSG_GET_CLIENT_WINDOW:break;
+		case MSG_PAINT:
+		{
+			
+		}break;
+	}
+	
+	pMsg->data.v = 0;
+	pMsg->data.p = 0;
 }
 
 

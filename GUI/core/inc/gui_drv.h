@@ -24,6 +24,8 @@ uint8_t gui_readPoint(uint8_t x, uint8_t y);
 
 void gui_Refresh(void);
 
+void gui_keyInput(void);
+
 # endif
 
 /********************************************  END OF FILE  *******************************************/

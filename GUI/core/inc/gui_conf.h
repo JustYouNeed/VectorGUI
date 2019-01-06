@@ -16,6 +16,10 @@
 # ifndef __GUI_CONF_H
 # define __GUI_CONF_H
 
+
+/* 是否使用Bresenham算法画线，如果为0，则调用DDA算法 */
+# define GUI_DRAW_LINE_BRESE	1u
+
 # define GUI_OS_SUPPORT		0u
 
 

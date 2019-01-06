@@ -646,14 +646,14 @@
               <FilePath>..\GUI\core\src\gui_widget.c</FilePath>
             </File>
             <File>
+              <FileName>gui_msg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\GUI\core\src\gui_msg.c</FilePath>
+            </File>
+            <File>
               <FileName>gui_mem.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\GUI\core\src\gui_mem.c</FilePath>
-            </File>
-            <File>
-              <FileName>gui_graph2.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\GUI\core\src\gui_graph2.c</FilePath>
             </File>
           </Files>
         </Group>

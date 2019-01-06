@@ -2,7 +2,7 @@
   *******************************************************************************************************
   * File Name: gui_basic.c
   * Author: Vector
-  * Version: V1.0.0
+  * Version: V1.0.1
   * Date: 2018-12-29
   * Brief: 提供GUI基本2D绘图函数，部分函数参考正点原子遥控GUI中的程序，原作者为黄绍斌
   *******************************************************************************************************
@@ -10,6 +10,10 @@
   *		1.Author: Vector
 	*			Date: 2018-12-29
 	*			Mod: 建立文件
+	*
+	*		2.Author: Vector
+	*			Date: 2019-1-2
+	*			Mod: 重写画圆函数和画椭圆函数
 	*
   *******************************************************************************************************
   */	
@@ -20,12 +24,160 @@
 */
 # include "gui.h"
 
-uint16_t gui_readLeftPoint(uint16_t x0, uint16_t y0, uint8_t color)
+
+# if (GUI_DRAW_LINE_BRESE > 0u)
+/*
+*********************************************************************************************************
+*                            gui_drawLineBresenham              
+*
+* Description: 使用Bresenham算法画线
+*             
+* Arguments  : x0,y0: 线的起点坐标
+*							 x1,y1: 线的终点坐标
+*							 color: 线的颜色
+*
+* Reutrn     : None.
+*
+* Note(s)    : 相对于DDA算法，Bresenham算法避免了浮点运算，优于DDA算法，传入参数时，需要保证
+*							 起始点的坐标小于终点坐标
+*********************************************************************************************************
+*/
+static void gui_drawLineBresenham(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, GUI_COLOR color)
 {
-	return 0;
+	int16_t dx = 0, dy = 0, d = 0, dx_x2 = 0, dy_x2 = 0, dxy_x2 = 0, dyx_x2 = 0;
+	int16_t dx_dir = 0, dy_dir = 0;	/* 记录X，Y增长方向 */
+	uint16_t x = x0, y = y0;
+	uint8_t k = 0;		/* 该变量用于表示直线斜率是否大小1，大于1时为1，否则为0 */
+	
+	/* 计算X，Y轴的差值以及增长方向 */
+	dx = x1 - x0;
+	dx_dir = (dx > 0) ? 1 : -1;
+	dx = dx*dx_dir;	/* 取绝对值 */
+	dy = y1 - y0;
+	dy_dir = (dy > 0) ? 1 : -1;
+	dy = dy*dy_dir;
+	
+	k = (dy > dx) ? 1 : 0;	/* 判断斜率 */
+	
+	/* 中间变量，用于加快计算 */
+	dx_x2 = 2 * dx;
+	dy_x2 = 2 * dy;
+	dyx_x2 = 2 * (dy - dx);
+	dxy_x2 = 2 * (dx - dy);
+	
+	
+	/* 画第一个点 */
+	gui_drawPoint(x, y, color);
+	if(k)	/* 斜率大于1的直线 */
+	{
+		d = 2 * dx - dy;
+		while(y < y1)
+		{
+			gui_drawPoint(x, y, color);
+			if(d < 0) d += dx_x2;
+			else 
+			{
+				d += dxy_x2;
+				x += dx_dir;
+			}
+			y += dy_dir;
+		}
+	}
+	else	/* 斜率小于等于1 */
+	{
+		d = 2 * dy - dx;
+		while(x < x1)
+		{
+			gui_drawPoint(x, y, color);
+			if(d < 0) d += dy_x2;
+			else 
+			{
+				d += dyx_x2;
+				y += dy_dir;
+			}
+			x += dx_dir;
+		}
+	}
 }
-uint16_t gui_readRightPoint(uint16_t x0, uint16_t y0, uint8_t color);
-int8_t gui_comparePointColor(uint16_t x0, uint16_t y0, uint8_t color);
+# else
+/*
+*********************************************************************************************************
+*                        gui_drawLineDDA                  
+*
+* Description: 使用DDA算法画线
+*             
+* Arguments  : x0,y0: 线的起点坐标
+*							 x1,y1: 线的终点坐标
+*							 color: 线的颜色
+*
+* Reutrn     : None.
+*
+* Note(s)    : None.
+*********************************************************************************************************
+*/
+static void gui_drawLineDDA(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, GUI_COLOR color)
+{
+	int dx = 0, dy = 0, steps = 0;	/* 坐标差值以及需要的步数 */
+	int8_t dx_dir = 1, dy_dir = 1;	/* X，Y的增长方向 */
+	float x = x0, y = y0;	/* 画线过程中的点坐标 */
+	float xInc = 0.0f, yInc = 0.0f; /* 画线时的坐标增量 */
+	uint16_t i = 0;
+	
+	/* 计算坐标的差值 */
+	dx = x1 - x0;
+	dx_dir = (dx > 0) ? 1 : -1;
+	dx = dx_dir * dx;	/* 取绝对值 */
+	dy = y1 - y0;
+	dy_dir = (dy > 0) ? 1 : -1;
+	dy = dy_dir * dy;
+	
+	/* 对于斜率小于1的线，在画线时取X轴为自增方向，需要的步数也用X轴的差值 */
+	if(dx > dy) 	
+		steps = dx;
+	else	/* 斜率大小等于1时以Y轴为自增量 */
+		steps = dy;
+	
+	/* 计算两个坐标的自增量，斜率大小等于1时Y轴的增量为1，X轴的增量为1/k,
+		 斜率小于1时X轴的增量为1，Y轴的增量为k	*/
+	xInc = (float)(dx) / steps * dx_dir;
+	yInc = (float)(dy) / steps * dy_dir;	
+	
+	/* 画线 */
+	for(i = 0; i < steps; i++)
+	{
+		gui_drawPoint((uint16_t)x, (uint16_t)y, color);
+		x += xInc;
+		y += yInc;
+	}
+}
+# endif
+
+/*
+*********************************************************************************************************
+*                         gui_drawPointSym                 
+*
+* Description: 画以指定点(x0, y0)为原点,关于X，Y轴以及Y=X轴对称的点，主要用于画圆、椭圆等对称性较高的圆形
+*             
+* Arguments  : x0,y0: 对称点
+*							 x, y: 相对点(x0, y0)的点坐标
+*							 color: 颜色
+*
+* Reutrn     : None.
+*
+* Note(s)    : None.
+*********************************************************************************************************
+*/
+static void gui_drawPointSym(uint16_t x0, uint16_t y0, uint16_t x, uint16_t y, GUI_COLOR color)
+{
+	gui_drawPoint(x0 + x, y0 + y, color);	/* (x, y) */
+	gui_drawPoint(x0 + y, y0 + x, color); /* (y, x) */
+	gui_drawPoint(x0 + y, y0 - x, color);	/* (y, -x) */
+	gui_drawPoint(x0 + x, y0 - y, color); /* (x, -y) */
+	gui_drawPoint(x0 - x, y0 - y, color); /* (-x, -y) */
+	gui_drawPoint(x0 - y, y0 - x, color); /* (-y, -x) */
+	gui_drawPoint(x0 - y, y0 + x, color); /* (-y, x) */
+	gui_drawPoint(x0 - x, y0 + y, color); /* (-x, y) */
+}
 
 /*
 *********************************************************************************************************
@@ -44,68 +196,24 @@ int8_t gui_comparePointColor(uint16_t x0, uint16_t y0, uint8_t color);
 */
 void gui_drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, GUI_COLOR color)
 {
-	int32_t dx = 0, dy = 0;
-	int8_t dx_dir = 0, dy_dir = 0;
-	int32_t dx_x2 = 0, dy_x2 = 0;
-	int32_t di = 0;
-	
-	dx = x1 - x0;	/* 求两点之间的差值 */
-	dy = y1 - y0;
-	
-	/* 判断增长方向 */
-	if(dx > 0) dx_dir = 1;
-	else if(dx < 0) dx_dir = -1;
-	else 	/* 是垂直线，直接画垂直线 */
+	if(x0 == x1) 	/* 是垂直线，直接画垂直线 */
+	{
 		gui_drawVLine(x0, y0, y1, color);
-	
-	if(dy > 0) dy_dir = 1;
-	else if(dy < 0) dy_dir = -1;
-	else /* 是水平线，直接画水平线 */
-		gui_drawHLine(x0, y0, x1, color);
-	
-	/* 将dx、dy取绝对值 */
-	dx = dx_dir * dx;
-	dy = dy_dir * dy;
-
-	/* 计算2倍的dx及dy值 */
-	dx_x2 = dx*2;
-	dy_x2 = dy*2;
-	
-	/* 使用Bresenham法进行画直线 */
-	if(dx>=dy)						// 对于dx>=dy，则使用x轴为基准
-	{  
-		di = dy_x2 - dx;
-		while(x0!=x1)
-		{  
-			gui_drawPoint(x0, y0, color);
-			x0 += dx_dir;
-			if(di<0)
-				di += dy_x2;		// 计算出下一步的决策值
-			else
-			{  
-				di += dy_x2 - dx_x2;
-				y0 += dy_dir;
-			}
-		}
-		gui_drawPoint(x0, y0, color);	// 显示最后一点
+		return ;
 	}
-	else							// 对于dx<dy，则使用y轴为基准
-	{  
-		di = dx_x2 - dy;
-		while(y0!=y1)
-		{  
-			gui_drawPoint(x0, y0, color);
-			y0 += dy_dir;
-			if(di<0)
-				di += dx_x2;
-			else
-			{  
-				di += dx_x2 - dy_x2;
-				x0 += dx_dir;
-			}
-		}
-		gui_drawPoint(x0, y0, color);		// 显示最后一点
-	} 
+	
+	if(y0 == y1)/* 是水平线，直接画水平线 */
+	{
+		gui_drawHLine(x0, y0, x1, color);
+		return ;
+	}
+	
+	/* 不是水平线或者垂直线则画斜线 */
+# if (GUI_DRAW_LINE_BRESE > 0u)
+	gui_drawLineBresenham(x0, y0, x1, y1, color);
+# else
+	gui_drawLineDDA(x0, y0, x1, y1, color);
+# endif
 }
 
 /*
@@ -126,7 +234,7 @@ void gui_drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, GUI_COLOR 
 */
 void gui_drawLineWidth(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint8_t width, GUI_COLOR color)
 {
-		int32_t   dx;						// 直线x轴差值变量
+	int32_t   dx;						// 直线x轴差值变量
 	int32_t   dy;          				// 直线y轴差值变量
 	int8_t    dx_dir;					// x轴增长方向，为-1时减值方向，为1时增值方向
 	int8_t    dy_dir;					// y轴增长方向，为-1时减值方向，为1时增值方向
@@ -792,111 +900,41 @@ GUI_Context.drawPosX = 1;
 
 /*
 *********************************************************************************************************
-*                      gui_drawCircle                    
+*                           gui_drawCircleBresenham               
 *
-* Description: 画圆函数
+* Description: 利用Bresenham算法画圆
 *             
-* Arguments  : x,y: 圆心坐标
-*							 radius: 圆半径
+* Arguments  : x0,y0: 圆心坐标
+*							 r: 圆半径
 *							 color: 颜色
 *
 * Reutrn     : None.
 *
-* Note(s)    : None.
+* Note(s)    : 圆半径虽然可以输入浮点数，但实际上内部处理成整形变量
 *********************************************************************************************************
 */
-void gui_drawCircle(uint16_t x, uint16_t y, uint16_t radius, GUI_COLOR color)
+void gui_drawCircle(uint16_t x0, uint16_t y0, double r, GUI_COLOR color)
 {
-	int32_t  draw_x0, draw_y0;			// 刽图点坐标变量
-	int32_t  draw_x1, draw_y1;	
-	int32_t  draw_x2, draw_y2;	
-	int32_t  draw_x3, draw_y3;	
-	int32_t  draw_x4, draw_y4;	
-	int32_t  draw_x5, draw_y5;	
-	int32_t  draw_x6, draw_y6;	
-	int32_t  draw_x7, draw_y7;	
-	int32_t  xx, yy;					// 画圆控制变量
-	int32_t  di;						// 决策变量
-
-	/* 参数过滤 */
-	if(0 == radius) gui_drawPoint(x, y, color);;
-
-	/* 计算出8个特殊点(0、45、90、135、180、225、270度)，进行显示 */
-	draw_x0 = draw_x1 = x;
-	draw_y0 = draw_y1 = y + radius;
-	if(draw_y0 < LCD_Y) gui_drawPoint(draw_x0, draw_y0, color);	// 90度
-
-	draw_x2 = draw_x3 = x;
-	draw_y2 = draw_y3 = y - radius;
-	if(draw_y2 >= 0) gui_drawPoint(draw_x2, draw_y2, color);			// 270度
-
-
-	draw_x4 = draw_x6 = x + radius;
-	draw_y4 = draw_y6 = y;
-	if(draw_x4 < LCD_X) gui_drawPoint(draw_x4, draw_y4, color);	// 0度
-
-	draw_x5 = draw_x7 = x - radius;
-	draw_y5 = draw_y7 = y;
-	if(draw_x5 >= 0) gui_drawPoint(draw_x5, draw_y5, color);			// 180度   
-	if(1 == radius) return;					// 若半径为1，则已圆画完
-   
-   
-	/* 使用Bresenham法进行画圆 */
-	di = 3 - 2*radius;					// 初始化决策变量
-
-	xx = 0;
-	yy = radius;	
-	while(xx < yy)
-	{  
-		if(di < 0)
-			di += 4*xx + 6;	      
-		else
-		{  
-			di += 4*(xx - yy) + 10;
-			yy--;	  
-			draw_y0--;
-			draw_y1--;
-			draw_y2++;
-			draw_y3++;
-			draw_x4--;
-			draw_x5++;
-			draw_x6--;
-			draw_x7++;	 	
+	uint16_t x = 0, y = 0, R = (int16_t)r;
+	int16_t h = 0;	/* h为决策变量 */
+	
+	y = R;
+	h = 1 - R;	/* 初始化决策变量为1-R */
+	
+	/* 因为圆的对称性，所以只需要计算0至PI/4内的点 */
+	while(x <= y)
+	{
+		gui_drawPointSym(x0, y0, x, y, color);
+		
+		/* h小于0表示点在圆外，y(k + 1) = y(k) */
+		if(h < 0)
+			h += 2 * x + 3;
+		else	/* h大于等于零表示点在圆上或者圆内, y(k + 1) = y(k) - 1 */
+		{
+			h += 2 * (x - y) + 5;
+			y--;
 		}
-		xx++;   
-		draw_x0++;
-		draw_x1--;
-		draw_x2++;
-		draw_x3--;
-		draw_y4++;
-		draw_y5++;
-		draw_y6--;
-		draw_y7--;
-
-		/* 要判断当前点是否在有效范围内 */
-		if( (draw_x0<=LCD_X)&&(draw_y0>=0) )	
-			gui_drawPoint(draw_x0, draw_y0, color);
-
-		if( (draw_x1>=0)&&(draw_y1>=0) )	
-			gui_drawPoint(draw_x1, draw_y1, color);
-
-		if( (draw_x2<=LCD_X)&&(draw_y2<=LCD_Y) )	
-			gui_drawPoint(draw_x2, draw_y2, color);   
-
-		if( (draw_x3>=0)&&(draw_y3<=LCD_Y) )	
-			gui_drawPoint(draw_x3, draw_y3, color);
-
-		if( (draw_x4<=LCD_X)&&(draw_y4>=0) )	
-			gui_drawPoint(draw_x4, draw_y4, color);
-
-		if( (draw_x5>=0)&&(draw_y5>=0) )	
-			gui_drawPoint(draw_x5, draw_y5, color);
-
-		if( (draw_x6<=LCD_X)&&(draw_y6<=LCD_Y) )	
-			gui_drawPoint(draw_x6, draw_y6, color);
-
-		if( (draw_x7>=0)&&(draw_y7<=LCD_Y) )	
-			gui_drawPoint(draw_x7, draw_y7, color);
+		x++;
 	}
 }
 
@@ -1091,118 +1129,57 @@ void gui_fillCircle(uint16_t x, uint16_t y, uint16_t radius, GUI_COLOR color)
 *
 * Reutrn     : None.
 *
-* Note(s)    : None.
+* Note(s)    : 该算法在F401CCU6芯片(84MHz)上需要大概220us
 *********************************************************************************************************
 */
-void gui_drawEllipse(uint16_t x, uint16_t y, uint16_t a, uint16_t b, GUI_COLOR color)
+void gui_drawEllipse(uint16_t x0, uint16_t y0, uint16_t a, uint16_t b, GUI_COLOR color)
 {
-	uint16_t x0 = 0, y0 = 0, x1 = 0, y1 = 0;
-	int32_t  draw_x0, draw_y0;			// 刽图点坐标变量
-	int32_t  draw_x1, draw_y1;
-	int32_t  draw_x2, draw_y2;
-	int32_t  draw_x3, draw_y3;
-	int32_t  xx, yy;					// 画图控制变量
-
-	int32_t  center_x, center_y;		// 椭圆中心点坐标变量
-	int32_t  radius_x, radius_y;		// 椭圆的半径，x轴半径和y轴半径
-	int32_t  radius_xx, radius_yy;		// 半径乘平方值
-	int32_t  radius_xx2, radius_yy2;	// 半径乘平方值的两倍
-	int32_t  di;						// 定义决策变量
+	uint16_t x = 0, y = 0;
+	float d = 0.0f, aa = 0.0f, bb = 0.0f;
 	
-	x0 = x - a/2;	/* 计算最左边的点的x坐标 */
-	x1 = x + a/2;	/* 最右边的点 */
-	y0 = y - b/2;	/* 上边 */
-	y1 = y + a/2;	/* 下边 */
+	aa = a * a;
+	bb = b * b;
 	
-	/* 参数过滤 */
-	if( (x0==x1) || (y0==y1) ) return;
+	d = bb + aa * (0.25 - b);
+	
+	x = 0;
+	y = b;
+	
+	/* 先画上下两个顶点 */
+	gui_drawPoint(x0 + x, y0 + y, color);
+	gui_drawPoint(x0 + x, y0 - y, color);
 
-	/* 计算出椭圆中心点坐标 */
-	center_x = (x0 + x1) >> 1;			
-	center_y = (y0 + y1) >> 1;
-
-	/* 计算出椭圆的半径，x轴半径和y轴半径 */
-	if(x0 > x1)
-		radius_x = (x0 - x1) >> 1;
-	else
-		radius_x = (x1 - x0) >> 1;
-	if(y0 > y1)
-		radius_y = (y0 - y1) >> 1;
-	else
-		radius_y = (y1 - y0) >> 1;
-   
-	/* 计算半径平方值 */
-	radius_xx = radius_x * radius_x;
-	radius_yy = radius_y * radius_y;
-
-	/* 计算半径平方值乘2值 */
-	radius_xx2 = radius_xx<<1;
-	radius_yy2 = radius_yy<<1;
-
-	/* 初始化画图变量 */
-	xx = 0;
-	yy = radius_y;
-	di = radius_yy2 + radius_xx - radius_xx2*radius_y ;	// 初始化决策变量 
-
-	/* 计算出椭圆y轴上的两个端点坐标，作为作图起点 */
-	draw_x0 = draw_x1 = draw_x2 = draw_x3 = center_x;
-	draw_y0 = draw_y1 = center_y + radius_y;
-	draw_y2 = draw_y3 = center_y - radius_y;
-
-	gui_drawPoint(draw_x0, draw_y0, color);					// 画y轴上的两个端点 
-	gui_drawPoint(draw_x2, draw_y2, color);
-
-	while( (radius_yy*xx) < (radius_xx*yy) ) 
-	{  	
-		if(di<0)
-	 		di+= radius_yy2*(2*xx+3);
+	while((bb * (x + 1)) < (aa * (y - 0.5)))
+	{		
+		if(d <= 0)	d += bb * ((x << 1) + 3);
 		else
-		{  
-			di += radius_yy2*(2*xx+3) + 4*radius_xx - 4*radius_xx*yy;
-			yy--;
-			draw_y0--;
-			draw_y1--;
-			draw_y2++;
-			draw_y3++;				 
+		{
+			d += bb * ((x << 1) + 3) + aa * (2 - (y << 1));
+			y--;
 		}
-		xx ++;						// x轴加1
-		draw_x0++;
-		draw_x1--;
-		draw_x2++;
-		draw_x3--;
-
-		gui_drawPoint(draw_x0, draw_y0, color);
-		gui_drawPoint(draw_x1, draw_y1, color);
-		gui_drawPoint(draw_x2, draw_y2, color);
-		gui_drawPoint(draw_x3, draw_y3, color);
+		x++;
+		gui_drawPoint(x0 + x, y0 + y, color);
+		gui_drawPoint(x0 + x, y0 - y, color);
+		gui_drawPoint(x0 - x, y0 - y, color);
+		gui_drawPoint(x0 - x, y0 + y, color);
 	}
-  
-	di = radius_xx2*(yy-1)*(yy-1) + radius_yy2*xx*xx + radius_yy + radius_yy2*xx - radius_xx2*radius_yy;
-	while(yy>=0) 
-	{  
-		if(di<0)
-		{  
-			di+= radius_xx2*3 + 4*radius_yy*xx + 4*radius_yy - 2*radius_xx2*yy;
-
-			xx ++;						// x轴加1	 		
-			draw_x0++;
-			draw_x1--;
-			draw_x2++;
-			draw_x3--;  
+	
+	d = bb * (x >> 2) + aa * (1 - (y << 1));
+	while(y > 0)
+	{
+		if(d <= 0)
+		{
+			x++;
+			d += bb * ((x + 1) << 1) + aa * (3 - (y << 1));
 		}
 		else
-			di += radius_xx2*3 - 2*radius_xx2*yy;	 	 		     			 
-		yy--;
-		draw_y0--;
-		draw_y1--;
-		draw_y2++;
-		draw_y3++;	
-
-		gui_drawPoint(draw_x0, draw_y0, color);
-		gui_drawPoint(draw_x1, draw_y1, color);
-		gui_drawPoint(draw_x2, draw_y2, color);
-		gui_drawPoint(draw_x3, draw_y3, color);
-	}  
+			d += aa * (3 - (y << 1));
+		y--;
+		gui_drawPoint(x0 + x, y0 + y, color);
+		gui_drawPoint(x0 + x, y0 - y, color);
+		gui_drawPoint(x0 - x, y0 - y, color);
+		gui_drawPoint(x0 - x, y0 + y, color);
+	}
 }
 
 /*

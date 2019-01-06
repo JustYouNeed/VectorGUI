@@ -10,6 +10,7 @@
 .\object\gui_widget.o: ..\GUI\core\inc\gui_font.h
 .\object\gui_widget.o: ..\GUI\core\inc\gui_drv.h
 .\object\gui_widget.o: ..\GUI\core\inc\gui_basic.h
+.\object\gui_widget.o: ..\GUI\core\inc\gui_msg.h
 .\object\gui_widget.o: ..\GUI\core\inc\gui_graph2.h
 .\object\gui_widget.o: ..\GUI\core\inc\gui_core.h
 .\object\gui_widget.o: ..\GUI\core\inc\gui_widget.h

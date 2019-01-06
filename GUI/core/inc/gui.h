@@ -36,6 +36,7 @@
 # include "gui_font.h"
 # include "gui_drv.h"
 # include "gui_basic.h"
+# include "gui_msg.h"
 # include "gui_graph2.h"
 # include "gui_core.h"
 # include "gui_widget.h"

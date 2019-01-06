@@ -42,7 +42,7 @@ void bsp_Init(void)
 	bsp_mem_Init();
 //	bsp_uart_Init();
 	bsp_led_Init();
-//	bsp_key_Init();
+	bsp_key_Init();
 //	bsp_motor_Init();
 }
 

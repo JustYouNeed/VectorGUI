@@ -77,6 +77,7 @@
 .\object\display.o: ..\GUI\core\inc\gui_font.h
 .\object\display.o: ..\GUI\core\inc\gui_drv.h
 .\object\display.o: ..\GUI\core\inc\gui_basic.h
+.\object\display.o: ..\GUI\core\inc\gui_msg.h
 .\object\display.o: ..\GUI\core\inc\gui_graph2.h
 .\object\display.o: ..\GUI\core\inc\gui_core.h
 .\object\display.o: ..\GUI\core\inc\gui_widget.h

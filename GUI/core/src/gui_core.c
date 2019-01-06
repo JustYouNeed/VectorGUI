@@ -26,15 +26,15 @@ GUI_CONTEXT GUI_Context;
 
 /*
 *********************************************************************************************************
-*                                          
+*                          gui_gotoXY                
 *
-* Description: 
+* Description: 跳转到指定坐标
 *             
-* Arguments  : 
+* Arguments  : x,y: 指定坐标
 *
-* Reutrn     : 
+* Reutrn     : None.
 *
-* Note(s)    : 
+* Note(s)    : None.
 *********************************************************************************************************
 */
 void gui_gotoXY(uint16_t x, uint16_t y)
@@ -64,15 +64,15 @@ void gui_Init(void)
 
 /*
 *********************************************************************************************************
-*                                          
+*                              gui_clear            
 *
-* Description: 
+* Description: GUI清屏函数
 *             
-* Arguments  : 
+* Arguments  : None.
 *
-* Reutrn     : 
+* Reutrn     : None.
 *
-* Note(s)    : 
+* Note(s)    : None.
 *********************************************************************************************************
 */
 void gui_clear(void)
@@ -103,18 +103,21 @@ void gui_clearRect(uint16_t x0, uint16_t y0, uint16_t width, uint16_t height)
 *********************************************************************************************************
 *                      gui_excute                    
 *
-* Description: 
+* Description: GUI线程执行函数，负责GUI的重绘以及消息的处理
 *             
-* Arguments  : 
+* Arguments  : None.
 *
-* Reutrn     : 
+* Reutrn     : None.
 *
-* Note(s)    : 
+* Note(s)    : None.
 *********************************************************************************************************
 */
 void gui_excute(void)
 {
-	wm_pocess();
+//	gui_clear();
+//	wm_onPaint();
+	msg_process();
+	gui_Refresh();	/* 更新屏幕 */
 }
 
 

@@ -17,14 +17,15 @@
 # define __GUI_WINDOW_H
 
 # define WINDOW_Handle	int16_t
+typedef struct WINDOW_OBJ WINDOW_OBJ;
 
 /* window控件结构体 */
-typedef struct
+struct WINDOW_OBJ
 {
 	GUI_RECT rect;
 	uint8_t *title;
 	uint8_t status;
-}WINDOW_OBJ;
+};
 
 void window_onPaint(const WINDOW_OBJ *pWindow);
 

@@ -196,72 +196,102 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>167</LineNumber>
+          <LineNumber>111</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134228360</Address>
+          <Address>134227524</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>E:\瀛︿範璧勬枡\GUI\OLEDGUI\VectorGUI\GUI\core\src\gui_wm.c</Filename>
+          <Filename>E:\瀛︿範璧勬枡\GUI\OLEDGUI\VectorGUI\APP\src\display.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\VectorFly\../GUI/core/src/gui_wm.c\167</Expression>
+          <Expression>\\VectorFly\../APP/src/display.c\111</Expression>
         </Bp>
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>90</LineNumber>
+          <LineNumber>121</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134221900</Address>
+          <Address>134227660</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>E:\瀛︿範璧勬枡\GUI\OLEDGUI\VectorGUI\GUI\widget\src\gui_button.c</Filename>
+          <Filename>E:\瀛︿範璧勬枡\GUI\OLEDGUI\VectorGUI\APP\src\display.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\VectorFly\../GUI/widget/src/gui_button.c\90</Expression>
+          <Expression>\\VectorFly\../APP/src/display.c\121</Expression>
         </Bp>
         <Bp>
           <Number>2</Number>
           <Type>0</Type>
-          <LineNumber>44</LineNumber>
+          <LineNumber>79</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134222002</Address>
+          <Address>134229490</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>E:\瀛︿範璧勬枡\GUI\OLEDGUI\VectorGUI\GUI\widget\src\gui_button.c</Filename>
+          <Filename>E:\瀛︿範璧勬枡\GUI\OLEDGUI\VectorGUI\GUI\widget\src\gui_window.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\VectorFly\../GUI/widget/src/gui_button.c\44</Expression>
+          <Expression>\\VectorFly\../GUI/widget/src/gui_window.c\79</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>rocker</ItemText>
+          <ItemText>MEM_SRAMIN</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>rollDataRaw</ItemText>
+          <ItemText>MAP_SRAMIN</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>thrustDataRaw</ItemText>
+          <ItemText>WM_Desktop</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>GUI_Context</ItemText>
+          <ItemText>msg[msgCnt]</ItemText>
+        </Ww>
+        <Ww>
+          <count>4</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>msgCnt</ItemText>
+        </Ww>
+        <Ww>
+          <count>5</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>hDesk</ItemText>
+        </Ww>
+        <Ww>
+          <count>6</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>hButton1</ItemText>
+        </Ww>
+        <Ww>
+          <count>7</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>KEY</ItemText>
+        </Ww>
+        <Ww>
+          <count>8</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>keyFifo</ItemText>
+        </Ww>
+        <Ww>
+          <count>9</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>keyCount</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -925,8 +955,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\GUI\core\src\gui_mem.c</PathWithFileName>
-      <FilenameWithoutPath>gui_mem.c</FilenameWithoutPath>
+      <PathWithFileName>..\GUI\core\src\gui_msg.c</PathWithFileName>
+      <FilenameWithoutPath>gui_msg.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -934,11 +964,11 @@
       <GroupNumber>9</GroupNumber>
       <FileNumber>47</FileNumber>
       <FileType>1</FileType>
-      <tvExp>1</tvExp>
+      <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\GUI\core\src\gui_graph2.c</PathWithFileName>
-      <FilenameWithoutPath>gui_graph2.c</FilenameWithoutPath>
+      <PathWithFileName>..\GUI\core\src\gui_mem.c</PathWithFileName>
+      <FilenameWithoutPath>gui_mem.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

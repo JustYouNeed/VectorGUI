@@ -17,12 +17,13 @@
 # define __GUI_MENU_H
 
 # define MENU_Handle	uint16_t
+typedef struct MENU_OBJ MENU_OBJ;
 
 
-typedef struct
+struct MENU_OBJ
 {
 	GUI_RECT rect;
-}MENU_OBJ;
+};
 
 void menu_onPaint(const MENU_OBJ* pMenu);
 

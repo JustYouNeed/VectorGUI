@@ -47,12 +47,12 @@ typedef struct
 /* 控件类型 */
 typedef enum
 {
-	WIDGET_BUTTON = 0x00,
-	WIDGET_MENU,
-	WIDGET_PROGBAR,
-	WIDGET_SCROLLBAR,
-	WIDGET_WINDOW,
-	WIDGET_CHECKBOX,
+	WIDGET_BUTTON = 0x01,
+	WIDGET_MENU = 0x02,
+	WIDGET_PROGBAR = 0x03,
+	WIDGET_SCROLLBAR = 0x04,
+	WIDGET_WINDOW = 0x05,
+	WIDGET_CHECKBOX = 0x06,
 }WIDGET_TYPE;
 
 
@@ -68,32 +68,9 @@ typedef enum
 }GUI_TEXT_ALIGN;
 
 
-#pragma pack(8) 
-/* 控件结构体 */
-struct WIDGET_OBJ
-{
-	WIDGET_TYPE type;		/* 控件类型 */
-	uint8_t layer;			/* 控件属于哪一层，代表控件显示顺序，该值越小，控件就处于越上面 */
-	uint16_t id;
-	struct WIDGET_OBJ *pNext;	/* 兄弟控件 */
-	
-	void *widgetData;			/* 控件数据 */
-};
-#pragma pack ()
-typedef struct WIDGET_OBJ WIDGET_OBJ;
 
-/* 窗口结构体 */
-struct WM_OBJ
-{
-	GUI_RECT rect;	/* 主窗口 */
-	GUI_RECT invalidRect;	/* 无效窗口 */
-	WM_HWIN hWin;					/* 窗口句柄 */
-	uint16_t status;
-	uint16_t noOfWidget;	/* 该窗口下所挂载的控件数量 */
-	struct WIDGET_OBJ *pWidget;	/* 子控件 */
-	struct WM_OBJ *pNext;	/* 下一个窗口 */
-};
-typedef struct WM_OBJ WM_OBJ;
+
+
 
 
 

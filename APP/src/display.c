@@ -68,6 +68,22 @@ void display_Init(void)
 	isInit = true;
 }
 
+static void button_cb(WM_MESSAGE *pMsg)
+{
+	MSG_KEY_INFO *key = NULL;
+	
+	key = &pMsg->key;
+	
+	if(key->keyValue == MSG_KEY_UP)
+	{
+		bsp_led_Toggle(LED_RED);
+	}
+	else if(key->keyValue == MSG_KEY_DOWN)
+	{
+		bsp_led_Toggle(LED_BLUE);
+	}
+}
+
 /*
 *********************************************************************************************************
 *                        task_displayTask                  
@@ -84,51 +100,40 @@ void display_Init(void)
 void task_displayTask(void *p_arg)
 {
 	uint16_t cnt = 0, flag = 1;
-	WM_HWIN hWin1, hWin2, hWin3, hWin4, hWin5, hWin6, hWin7;
-	BUTTON_Handle hButton1 = 0, hButton2 = 0, hButton3 = 0, hButton4 = 0, hButton5 = 0;
-	uint8_t f = 0;
+	WM_HWIN hWin1;
+	WINDOW_Handle hWindow = 0;
+	BUTTON_Handle hButton1 = 0;
+//	uint8_t f = 0;
 	
 	gui_Init();
-	hWin1 = wm_Create(0, 0, 127, 63, 1);
-	hWin2 = wm_Create(0, 0, 127, 63, 0);
-	hWin3 = wm_Create(0, 0, 127, 63, 0);
-	hWin4 = wm_Create(0, 0, 127, 63, 0);
-//	hButton5 = button_Create(105, 30, 20, 20, 6, "E", hWin7);
-	window_Create(0, 0, 127, 63, "ok", 7, hWin4);
 
-	button_Delete(&hButton2);
-	button_Delete(&hButton3);
-	button_Delete(&hButton4);
-	wm_Delete(&hWin1);
-	wm_Delete(&hWin2);
-	wm_Delete(&hWin3);
-	wm_Delete(&hWin4);
+	hWin1 = wm_Create(0, 0, 127, 63, 1);
+	hWindow = window_Create(0, 0, 127, 63, "ok", 1, hWin1);
+	hButton1 = button_Create(5, 30, 20, 20, 2, "A", MSG_KEY_UP, hWin1);
+	button_setCallback(hButton1, button_cb);
+	
+	button_Create(30, 30, 20, 20, 3, "B", MSG_KEY_DOWN, hWin1);
+	button_Create(55, 30, 20, 20, 4, "C", MSG_KEY_LEFT, hWin1);
+	button_Create(80, 30, 20, 20, 5, "D", MSG_KEY_RIGHT, hWin1);
+//	button_Delete(&hButton1);
 	while(1)
 	{
 		gui_excute();
 		
 //		cnt++;
-		
+//		
 //		if(cnt%1 == 0)
 //		{
-			if(flag)
-			{
-				hButton1 = button_Create(5, 30, 20, 20, 2, "A", hWin4);
-				hButton2 = button_Create(30, 30, 20, 20, 3, "B", hWin4);
-				hButton3 = button_Create(55, 30, 20, 20, 4, "C", hWin4);
-				hButton4 = button_Create(80, 30, 20, 20, 5, "D", hWin4);
-				hButton5 = button_Create(105, 30, 20, 20, 6, "E", hWin4);
-				flag = 0;
-			}
-			else
-			{
-				button_Delete(&hButton1);
-				button_Delete(&hButton2);
-				button_Delete(&hButton3);
-				button_Delete(&hButton4);
-				button_Delete(&hButton5);
-				flag = 1;
-			}
+//			if(flag)
+//			{
+//				button_setText(hButton1, "B");
+//				flag = 0;
+//			}
+//			else
+//			{
+//				button_setText(hButton1, "C");
+//				flag = 1;
+//			}
 //			cnt = 0;
 //		}
 		vTaskDelay(5);

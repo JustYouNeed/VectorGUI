@@ -17,12 +17,12 @@
 # define __GUI_CHECKBOX_H
 
 # define CHECKBOX_Handle	int16_t
+typedef struct CHECKBOX_OBJ CHECKBOX_OBJ;
 
-
-typedef struct
+struct CHECKBOX_OBJ
 {
 	GUI_RECT rect;
-}CHECKBOX_OBJ;
+};
 
 
 void checkbox_onPaint(const CHECKBOX_OBJ *pCheckbox);

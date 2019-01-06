@@ -36,7 +36,7 @@ void gui_fillSquare(uint16_t x0, uint16_t y0, uint16_t sideLen, GUI_COLOR color)
 void gui_drawPolygon(const GUI_POINT *pPolygon, uint8_t points, GUI_COLOR color);
 void gui_drawPolyLine(const GUI_POINT *pPolyLine, uint8_t points, GUI_COLOR color);
 
-void gui_drawCircle(uint16_t x, uint16_t y, uint16_t radius, GUI_COLOR color);
+void gui_drawCircle(uint16_t x0, uint16_t y0, double r, GUI_COLOR color);
 void gui_fillCircle(uint16_t x, uint16_t y, uint16_t radius, GUI_COLOR color);
 
 void gui_drawEllipse(uint16_t x, uint16_t y, uint16_t a, uint16_t b, GUI_COLOR color);

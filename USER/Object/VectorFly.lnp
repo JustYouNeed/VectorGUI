@@ -41,6 +41,7 @@
 ".\object\gui_text.o"
 ".\object\gui_wm.o"
 ".\object\gui_widget.o"
+".\object\gui_msg.o"
 ".\object\gui_mem.o"
 ".\object\gui_button.o"
 ".\object\gui_menu.o"

@@ -19,7 +19,7 @@
   *******************************************************************************************************
 */
 # include "gui.h"
-# include "bsp_oled.h"
+# include "bsp.h"
 /*
 *********************************************************************************************************
 *                        gui_Init                  
@@ -128,6 +128,46 @@ uint8_t gui_readPoint(uint8_t x, uint8_t y)
 void gui_Refresh(void)
 {
 	bsp_oled_Refresh();
+}
+
+
+/*
+*********************************************************************************************************
+*                           gui_keyInput               
+*
+* Description: 
+*             
+* Arguments  : 
+*
+* Reutrn     : 
+*
+* Note(s)    : 
+*********************************************************************************************************
+*/
+void gui_keyInput(void)
+{
+	static uint16_t preKeyValue = 0x01;
+	uint16_t nowKeyValue = 0, keyId = 0;
+	MSG_KEY_INFO keyInfo;
+	
+	uint16_t keyValue = 0, msgKeyValue = 0;
+	
+	nowKeyValue = bsp_key_GetKey();
+	if(nowKeyValue == KEY_NONE) return ;
+	
+	keyId = nowKeyValue >> 8;
+	
+	
+	keyInfo.keyValue = 0x01 << keyId;
+	/* 如果上次有按键按下这次没有，说明按键已经释放 */
+	if(((preKeyValue & 0x02) != 0x02) && ((nowKeyValue & 0x02) == 0x02))
+	{
+		keyInfo.keyStatus = KEY_RELEASED;
+		msg_inputKey(&keyInfo);
+		return ;
+	}
+	keyInfo.keyStatus = KEY_PRESS;
+	msg_inputKey(&keyInfo);
 }
 
 

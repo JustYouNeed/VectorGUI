@@ -24,11 +24,67 @@
 */
 # include "gui.h"
 
-
-void window_onPaint(const WINDOW_OBJ *pWindow)
+static WINDOW_OBJ *_getObj(WINDOW_Handle hWindow, int16_t *err)
 {
-	gui_fillRectangle(pWindow->rect.x0, pWindow->rect.y0, pWindow->rect.x0 + pWindow->rect.width, pWindow->rect.y0 + 14, 1);
+	WIDGET_OBJ *pObj = NULL;
+	
+		/* 获取按钮控件 */
+	pObj = widget_getWidget(hWindow, err);	
+	if(!pObj) 
+	{
+		*err = ERR_PARA;
+		return NULL;
+	}
+	
+	return (WINDOW_OBJ *)(pObj->widgetData);
+}
+
+/*
+*********************************************************************************************************
+*                                          
+*
+* Description: 
+*             
+* Arguments  : 
+*
+* Reutrn     : 
+*
+* Note(s)    : 
+*********************************************************************************************************
+*/
+static void _onPaint(const WINDOW_OBJ *pWindow)
+{
+//	gui_fillRectangle(pWindow->rect.x0, pWindow->rect.y0, pWindow->rect.x0 + pWindow->rect.width, pWindow->rect.y0 + 14, 1);
 	gui_drawRectangle(pWindow->rect.x0, pWindow->rect.y0, pWindow->rect.x0 + pWindow->rect.width, pWindow->rect.y0 + pWindow->rect.height, 1);
+}
+
+/*
+*********************************************************************************************************
+*                                          
+*
+* Description: 
+*             
+* Arguments  : 
+*
+* Reutrn     : 
+*
+* Note(s)    : 
+*********************************************************************************************************
+*/
+static void window_defaultProc(WM_MESSAGE *pMsg)
+{
+	WINDOW_OBJ *pWindow = NULL;
+	int16_t err = ERR_NONE;
+	
+	pWindow = _getObj(pMsg->hWin, &err);
+	
+	switch(pMsg->msgId)
+	{
+		case MSG_PAINT:
+		{
+			_onPaint(pWindow);
+		}break;
+	}
 }
 
 /*
@@ -47,6 +103,7 @@ void window_onPaint(const WINDOW_OBJ *pWindow)
 WINDOW_Handle window_Create(uint16_t x0, uint16_t y0, uint16_t width, uint16_t height, uint8_t *title, uint16_t id, WM_HWIN hParent)
 {
 	WINDOW_OBJ *pWindow = NULL;
+	WINDOW_Handle hWindow = 0;
 	
 	if(!hParent) return -2;	/* 控件一定要有父窗口 */
 	
@@ -60,7 +117,10 @@ WINDOW_Handle window_Create(uint16_t x0, uint16_t y0, uint16_t width, uint16_t h
 	pWindow->rect.height = height;
 	pWindow->title = title;
 	
-	return widget_Create(WIDGET_WINDOW, pWindow, id, hParent);	
+	hWindow = widget_Create(WIDGET_WINDOW, pWindow, id, MSG_KEY_NULL, window_defaultProc, hParent);	
+//	msg_sendMsgNoData(hWindow, MSG_PAINT);
+	
+	return hWindow;
 }
 
 /********************************************  END OF FILE  *******************************************/
