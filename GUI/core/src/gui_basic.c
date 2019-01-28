@@ -873,8 +873,6 @@ void gui_drawPolyLine(const GUI_POINT *pPolyLine, uint8_t points, GUI_COLOR colo
 {
 	uint16_t x0 = 0, y0 = 0;	/* 用于画线 */
 
-GUI_Context.drawPosX = 1;
-	
 	if(points == 0) return ;	/* 点的个数无效直接返回 */
 	else if(points == 1) /* 只有一个点，画完也直接返回 */
 	{

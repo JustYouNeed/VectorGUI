@@ -25,6 +25,27 @@
 # include "gui.h"
 
 
+///*
+//*********************************************************************************************************
+//*                                          
+//*
+//* Description: 
+//*             
+//* Arguments  : 
+//*
+//* Reutrn     : 
+//*
+//* Note(s)    : 
+//*********************************************************************************************************
+//*/
+//void widget_sortList(WM_HWIN hParent)
+//{
+//	WM_OBJ *pWin = NULL;
+//	int16_t err = ERR_NONE;
+//	
+//	pWin = wm_getWindowObject(GUI_GET_HPARENT(hWidget), err);	/* 得到该控件的父窗口 */
+//}
+
 /*
 *********************************************************************************************************
 *                    widget_getWidget                      
@@ -114,6 +135,10 @@ WIDGET_HANDLE widget_Create(WIDGET_TYPE widgetType, void *pObj, uint8_t id, uint
 		
 	/* 将控件挂载到窗口上 */
 	pWin = wm_getWindowObject(hParent, &err);	/* 得到父窗口的结构体指针 */
+	
+	pWidget->layer = pWin->noOfWidget;		/* 设置控件的层 */
+	pWin->noOfWidget++;		/* 该窗口下的控件数量增加 */
+
 	if(pWin->pWidget == NULL)	/* 如果该窗口当前没有控件,就挂接该控件 */
 	{
 		pWin->pWidget = pWidget;

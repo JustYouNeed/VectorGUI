@@ -24,6 +24,19 @@
 */
 # include "gui.h"
 
+/*
+*********************************************************************************************************
+*                       _getObj                   
+*
+* Description: 
+*             
+* Arguments  : 
+*
+* Reutrn     : 
+*
+* Note(s)    : 
+*********************************************************************************************************
+*/
 static WINDOW_OBJ *_getObj(WINDOW_Handle hWindow, int16_t *err)
 {
 	WIDGET_OBJ *pObj = NULL;
@@ -38,24 +51,37 @@ static WINDOW_OBJ *_getObj(WINDOW_Handle hWindow, int16_t *err)
 	
 	return (WINDOW_OBJ *)(pObj->widgetData);
 }
-
+extern GUI_CONTEXT GUI_Context;
 /*
 *********************************************************************************************************
-*                                          
+*                            _onPaint              
 *
-* Description: 
+* Description: 窗口重绘函数
 *             
-* Arguments  : 
+* Arguments  : *pWindow: 窗口控制结构体指针
 *
-* Reutrn     : 
+* Reutrn     : None.
 *
-* Note(s)    : 
+* Note(s)    : 本文件私有函数
 *********************************************************************************************************
 */
 static void _onPaint(const WINDOW_OBJ *pWindow)
 {
-//	gui_fillRectangle(pWindow->rect.x0, pWindow->rect.y0, pWindow->rect.x0 + pWindow->rect.width, pWindow->rect.y0 + 14, 1);
+	int16_t XOffset = 0, YOffset = 0;
+	
+	GUI_Context.drawRect.x0 = pWindow->rect.x0;
+	GUI_Context.drawRect.y0 = pWindow->rect.y0;
+	GUI_Context.drawRect.width = pWindow->rect.width;
+	GUI_Context.drawRect.height = pWindow->rect.height;
+	
+	gui_fillRectangle(pWindow->rect.x0, pWindow->rect.y0, pWindow->rect.x0 + pWindow->rect.width, pWindow->rect.y0 + 14, 1);
 	gui_drawRectangle(pWindow->rect.x0, pWindow->rect.y0, pWindow->rect.x0 + pWindow->rect.width, pWindow->rect.y0 + pWindow->rect.height, 1);
+	
+	XOffset = (pWindow->rect.width - 6*gui_getStringLen(pWindow->title))/2;
+	YOffset = (14 - font_getYSize(GUI_Context.curFont))/2;
+	
+	gui_gotoXY(pWindow->rect.x0 + XOffset, pWindow->rect.y0 + YOffset);
+	gui_dispString(pWindow->title, 0);
 }
 
 /*
@@ -118,7 +144,7 @@ WINDOW_Handle window_Create(uint16_t x0, uint16_t y0, uint16_t width, uint16_t h
 	pWindow->title = title;
 	
 	hWindow = widget_Create(WIDGET_WINDOW, pWindow, id, MSG_KEY_NULL, window_defaultProc, hParent);	
-//	msg_sendMsgNoData(hWindow, MSG_PAINT);
+	msg_sendMsgNoData(hWindow, MSG_PAINT);
 	
 	return hWindow;
 }

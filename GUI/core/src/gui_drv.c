@@ -91,6 +91,12 @@ void gui_clearSCR(void)
 */
 void gui_drawPoint(uint8_t x, uint8_t y, GUI_COLOR color)
 {
+	if(x > (GUI_Context.drawRect.x0 + GUI_Context.drawRect.width)) return ;
+	if(x < GUI_Context.drawRect.x0) return ;
+	
+	if(y > (GUI_Context.drawRect.y0 + GUI_Context.drawRect.height)) return ;
+	if(y < GUI_Context.drawRect.y0) return ;
+	
 	bsp_oled_DrawPoint(x, y, color);
 }
 

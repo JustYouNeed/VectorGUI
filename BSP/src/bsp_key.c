@@ -48,9 +48,12 @@
 # define KEY_RIGHT_PORT	GPIOB
 # define KEY_RIGHT_PIN	GPIO_Pin_14
 
+# define KEY_PWR_PORT		GPIOA
+# define KEY_PWR_PIN		GPIO_Pin_0
+
 /*  按键长按时间, 单位为ms,取决于多久时间检测一个按键,
 		即多长时间调用一个bsp_key_Scan函数*/
-# define KEY_LONG_TIME		50
+# define KEY_LONG_TIME		500
 # define KEY_FILTER_TIME	5
 # define KEY_MAX_COUNT	16
 # define KEY_FIFO_SIZE	10
@@ -186,7 +189,7 @@ void bsp_key_Init(void)
 	bsp_key_AddKey(KEY_DOWN, KEY_DOWN_PORT, KEY_DOWN_PIN, KEY_MODE_K);
 	bsp_key_AddKey(KEY_LEFT, KEY_LEFT_PORT, KEY_LEFT_PIN, KEY_MODE_K);
 	bsp_key_AddKey(KEY_RIGHT, KEY_RIGHT_PORT, KEY_RIGHT_PIN, KEY_MODE_K);
-	
+	bsp_key_AddKey(KEY_PWR, KEY_PWR_PORT, KEY_PWR_PIN, KEY_MODE_K);
 	isInit = true;
 }
 

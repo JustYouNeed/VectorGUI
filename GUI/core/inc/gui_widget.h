@@ -41,7 +41,7 @@ struct WIDGET_OBJ
 
 void widget_onPaint(const struct WIDGET_OBJ *pWidget);
 WIDGET_OBJ *widget_getWidget(WIDGET_HANDLE hWidget, int16_t *err);
-
+void widget_sortList(WM_HWIN hParent);
 GUI_ERROR widget_Delete(WIDGET_HANDLE hWidget);
 WIDGET_HANDLE widget_Create(WIDGET_TYPE widgetType, void *pObj, uint8_t id, uint16_t actKey, WIDGET_CALLBACK *_cb, WM_HWIN hParent);
 

@@ -42,6 +42,11 @@ static void _onPaint(const BUTTON_OBJ* pButton)
 {
 	int16_t XOffset = 0, YOffset = 0;
 	
+	GUI_Context.drawRect.x0 = pButton->rect.x0;
+	GUI_Context.drawRect.y0 = pButton->rect.y0;
+	GUI_Context.drawRect.width = pButton->rect.width;
+	GUI_Context.drawRect.height = pButton->rect.height;
+	
 	gui_fillRectangle(pButton->rect.x0, pButton->rect.y0, pButton->rect.x0 + pButton->rect.width, pButton->rect.y0 + pButton->rect.height, 0);
 	
 	/* 计算按钮标题相对按钮起点的偏移量 */
@@ -158,13 +163,15 @@ static BUTTON_OBJ *_getButtonObj(BUTTON_Handle hButton, int16_t *err)
 */
 static void button_defaultProc(WM_MESSAGE *pMsg)
 {
-	BUTTON_Handle hObj;
+	BUTTON_Handle hObj = 0;
 	BUTTON_OBJ *pButton = NULL;
 	WIDGET_OBJ *pWidget = NULL;
 	int16_t err = ERR_NONE;
 	
-	hObj = pMsg->hWin;
-	pWidget = widget_getWidget(hObj, &err);
+	hObj = pMsg->hWin; /* 得到按钮句柄 */
+	
+	/* 得到按钮控件结构体 */
+	pWidget = widget_getWidget(hObj, &err); 
 	pButton = (BUTTON_OBJ *)(pWidget->widgetData);
 	
 	/* 根据不同的消息进行不同的处理 */
@@ -182,19 +189,19 @@ static void button_defaultProc(WM_MESSAGE *pMsg)
 				if(key->keyStatus == KEY_PRESS) /* 如果按键按下了 */
 				{
 					pButton->isPress = true; 
-					_onPaint(pButton);
+					msg_sendMsgNoData(hObj, MSG_PAINT);	/* 发送重绘消息 */
 					if(pButton->_cb) pButton->_cb(pMsg);
 				}
 				else if(key->keyStatus == KEY_RELEASED)	/* 按键释放了 */
 				{
 					pButton->isPress = false;
-					_onPaint(pButton);
+					msg_sendMsgNoData(hObj, MSG_PAINT);		/* 发送重绘消息 */
 				}
 			}
 		}break;
 		case MSG_PAINT: 	/* 按键重绘消息 */
 		{
-			_onPaint(pButton);
+			_onPaint(pButton);	/* 重绘 */
 		}break;
 		case MSG_DELETE:	/* 删除按键消息 */
 		{
@@ -334,6 +341,8 @@ GUI_ERROR button_setText(BUTTON_Handle hButton, const uint8_t *pText)
 	
 	pButton = _getButtonObj(hButton, &err);
 	pButton->title = (uint8_t *)pText;
+	
+	msg_sendMsgNoData(hButton, MSG_PAINT);
 	
 	return ERR_NONE;
 }

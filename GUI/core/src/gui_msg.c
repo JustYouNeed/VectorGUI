@@ -147,6 +147,8 @@ void msg_notifyWidget(WIDGET_HANDLE hWidget, WM_MESSAGE *pMsg)
 void msg_process(void)
 {
 	if(msgCnt <= 0) return ; /* 没有消息需要处理 */
+	int16_t err = ERR_NONE;
+	WIDGET_OBJ *pObj = WM_Desktop->pWidget;
 	
 	msgCnt--;
 	
@@ -154,32 +156,24 @@ void msg_process(void)
 	
 	switch(pMsg->msgId)
 	{
-		case MSG_KEY:
+		case MSG_KEY:	/* 对于按键消息，需要处理每一个控件 */
 		{
-			int16_t err = ERR_NONE;
-			WIDGET_OBJ *pObj = WM_Desktop->pWidget;
 			MSG_KEY_INFO *key = (MSG_KEY_INFO *)&(pMsg->key);
 			while(pObj)
 			{
+				/* 如果该控件注册了相应按键事件则响应 */
 				if(key->keyValue & pObj->actKey)
 				{
 					pMsg->hWin = pObj->id;
 					pObj->_cb(pMsg);
 				}
-				
 				pObj = pObj->pNext;
 			}
 		};break;
 		case MSG_PAINT:
 		{
-			int16_t err = ERR_NONE;
-			WIDGET_OBJ *pObj = WM_Desktop->pWidget;
-			while(pObj)
-			{
-					pObj->_cb(pMsg);
-				
-				pObj = pObj->pNext;
-			}
+			pObj = widget_getWidget(pMsg->hWin, &err);
+			pObj->_cb(pMsg);
 		}
 	}
 }

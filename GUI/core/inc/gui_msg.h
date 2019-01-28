@@ -53,6 +53,7 @@ enum MSG_KEY_ENUM
 	MSG_KEY_DOWN = 0x01 << 1,
 	MSG_KEY_LEFT = 0x01 << 2,
 	MSG_KEY_RIGHT = 0x01 << 3,
+	MSG_KEY_PWR = 0x01 << 4,
 };
 
 

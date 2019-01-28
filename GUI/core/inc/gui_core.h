@@ -19,10 +19,11 @@
 /* GUI上下文结构体，保存GUI信息 */
 typedef struct
 {
-	int16_t drawPosX, drawPosY;		/* 画图点 */
-	int16_t dispPosX, dispPosY;		/* 显示点 */
+	uint16_t drawPosX, drawPosY;		/* 画图点 */
+	uint16_t dispPosX, dispPosY;		/* 显示点 */
 	
 	GUI_FONT	curFont;
+	GUI_RECT drawRect;
 }GUI_CONTEXT;
 
 

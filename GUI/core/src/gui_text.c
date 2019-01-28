@@ -42,7 +42,7 @@ uint16_t gui_getStringLen(const uint8_t *str)
 *
 * Note(s)    : None.
 *********************************************************************************************************
-*/
+*/extern GUI_CONTEXT GUI_Context;
 void gui_setFont(GUI_FONT font)
 {
 	GUI_Context.curFont = font;
@@ -60,7 +60,7 @@ void gui_setFont(GUI_FONT font)
 *
 * Note(s)    : 
 *********************************************************************************************************
-*/
+*/extern GUI_CONTEXT GUI_Context;
 void gui_dispChar(uint8_t c, uint8_t mode)
 {
 	uint8_t YSize = 0;	/* ×ÖÌå´óÐ¡ */
@@ -135,7 +135,7 @@ void gui_dispCharAt(uint8_t c, uint16_t x0, uint16_t y0, uint8_t mode)
 *
 * Note(s)    : None.
 *********************************************************************************************************
-*/
+*/extern GUI_CONTEXT GUI_Context;
 void gui_dispString(uint8_t *str, uint8_t mode)
 {
 	uint8_t XSize = 0, YSize = 0;

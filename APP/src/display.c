@@ -76,11 +76,11 @@ static void button_cb(WM_MESSAGE *pMsg)
 	
 	if(key->keyValue == MSG_KEY_UP)
 	{
-		bsp_led_Toggle(LED_RED);
-	}
-	else if(key->keyValue == MSG_KEY_DOWN)
-	{
 		bsp_led_Toggle(LED_BLUE);
+	}
+	else if(key->keyValue == MSG_KEY_LEFT)
+	{
+		bsp_led_Toggle(LED_RED);
 	}
 }
 
@@ -102,40 +102,22 @@ void task_displayTask(void *p_arg)
 	uint16_t cnt = 0, flag = 1;
 	WM_HWIN hWin1;
 	WINDOW_Handle hWindow = 0;
-	BUTTON_Handle hButton1 = 0;
-//	uint8_t f = 0;
+	BUTTON_Handle hButton1 = 0, hButton2 = 0;
 	
 	gui_Init();
 
 	hWin1 = wm_Create(0, 0, 127, 63, 1);
-	hWindow = window_Create(0, 0, 127, 63, "ok", 1, hWin1);
-	hButton1 = button_Create(5, 30, 20, 20, 2, "A", MSG_KEY_UP, hWin1);
+	hWindow = window_Create(0, 0, 127, 63, "window", 1, hWin1);
+	hButton1 = button_Create(5, 30, 40, 20, 2, "LEFT", MSG_KEY_PWR, hWin1);
 	button_setCallback(hButton1, button_cb);
 	
-	button_Create(30, 30, 20, 20, 3, "B", MSG_KEY_DOWN, hWin1);
-	button_Create(55, 30, 20, 20, 4, "C", MSG_KEY_LEFT, hWin1);
-	button_Create(80, 30, 20, 20, 5, "D", MSG_KEY_RIGHT, hWin1);
-//	button_Delete(&hButton1);
+	hButton2 = button_Create(82, 30, 40, 20, 3, "RIGHT", MSG_KEY_LEFT, hWin1);
+	button_setCallback(hButton2, button_cb);
+	
 	while(1)
 	{
 		gui_excute();
 		
-//		cnt++;
-//		
-//		if(cnt%1 == 0)
-//		{
-//			if(flag)
-//			{
-//				button_setText(hButton1, "B");
-//				flag = 0;
-//			}
-//			else
-//			{
-//				button_setText(hButton1, "C");
-//				flag = 1;
-//			}
-//			cnt = 0;
-//		}
 		vTaskDelay(5);
 	}
 }

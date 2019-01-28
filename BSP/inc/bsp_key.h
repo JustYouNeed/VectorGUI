@@ -22,7 +22,8 @@ typedef enum{
 	KEY_DOWN = 0x01,
 	KEY_LEFT = 0x02,
 	KEY_RIGHT = 0x03,
-	KEY_COUNT = 0x04,
+	KEY_PWR = 0x04,
+	KEY_COUNT = 0x05,
 	KEY_NULL = 0x00,
 }keyId_e;
 
@@ -54,6 +55,10 @@ typedef enum
 	KEY_RIGHT_PRESS = ((KEY_RIGHT << 8) | 0x01),
 	KEY_RIGHT_UP = ((KEY_RIGHT << 8) | 0x02),
 	KEY_RIGHT_LONG = ((KEY_RIGHT << 8) | 0x03),
+	
+	KEY_PWR_PRESS = ((KEY_PWR << 8) | 0x01),
+	KEY_PWR_UP = ((KEY_PWR << 8) | 0x02),
+	KEY_PWR_LONG = ((KEY_PWR << 8) | 0x03),
 }keyValue_e;
 
 

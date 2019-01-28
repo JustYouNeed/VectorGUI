@@ -13,6 +13,8 @@
 ".\object\stm32f4xx_dma.o"
 ".\object\stm32f4xx_exti.o"
 ".\object\stm32f4xx_adc.o"
+".\object\stm32f4xx_pwr.o"
+".\object\stm32f4xx_rtc.o"
 ".\object\filter.o"
 ".\object\pid.o"
 ".\object\sort.o"

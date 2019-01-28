@@ -60,6 +60,16 @@ void gui_Init(void)
 {
 	gui_deviceInit();
 	wm_Init();
+	
+	GUI_Context.curFont = GUI_FONT_ASCII_6X8;
+	GUI_Context.dispPosX = 0;
+	GUI_Context.dispPosY = 0;
+	GUI_Context.drawPosX = 0;
+	GUI_Context.drawPosY = 0;
+	GUI_Context.drawRect.x0 = 0;
+	GUI_Context.drawRect.y0 = 0;
+	GUI_Context.drawRect.width = 127;
+	GUI_Context.drawRect.height = 63;
 }
 
 /*
