@@ -22,12 +22,14 @@ typedef struct CHECKBOX_OBJ CHECKBOX_OBJ;
 struct CHECKBOX_OBJ
 {
 	GUI_RECT rect;
+	uint8_t text;
+	
 };
 
 
 void checkbox_onPaint(const CHECKBOX_OBJ *pCheckbox);
 
-
+CHECKBOX_Handle  checkbox_Create(uint16_t x0, uint16_t y0, uint8_t *text, uint16_t id, WIN_Handle hParent);
 # endif
 
 /********************************************  END OF FILE  *******************************************/

@@ -44,9 +44,12 @@ GUI_ERROR button_setText(BUTTON_Handle hButton, const uint8_t *pText);
 GUI_ERROR button_setTextAlign(BUTTON_Handle hButton);
 GUI_ERROR button_getTextAlign(BUTTON_Handle hButton);
 
-BUTTON_Handle button_Create(uint16_t x0, uint16_t y0, uint16_t width, uint16_t height, uint16_t id, uint8_t *title, uint16_t actKey, WM_HWIN hParent);
-BUTTON_Handle button_CreateEx(BUTTON_OBJ *pButton, uint8_t id, uint16_t actKey, WM_HWIN hParent);
+BUTTON_Handle button_Create(uint16_t x0, uint16_t y0, uint16_t width, uint16_t height, uint16_t id, uint8_t *title, uint16_t actKey, WIN_Handle hParent);
+BUTTON_Handle button_CreateEx(BUTTON_OBJ *pButton, uint8_t id, uint16_t actKey, WIN_Handle hParent);
 GUI_ERROR button_Delete(BUTTON_Handle *hButton);
+
+
+void button_onPaint(BUTTON_OBJ *pButton);
 
 # endif
 

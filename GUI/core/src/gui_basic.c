@@ -1358,6 +1358,22 @@ void gui_fillSector(uint16_t x, uint16_t y, uint16_t radius, uint16_t startAngle
 {
 }
 
+
+
+void gui_rectCrop(GUI_RECT *rect1, GUI_RECT *rect2)
+{
+	if(rect2->x0 > rect1->x0) rect1->x0 = rect2->x0;
+	if(rect2->y0 > rect1->y0) rect1->y0 = rect2->y0;
+	
+	rect1->width = rect1->width - (rect2->x0 - rect1->x0);
+	rect1->height = rect1->height - (rect2->y0 - rect1->y0);
+	
+	if(rect1->width + rect1->x0 > (rect2->x0 + rect2->width))
+		rect1->width = (rect2->width + rect2->x0) - rect1->x0;
+	if(rect1->height + rect1->y0 > rect2->y0 + rect2->height)
+		rect1->height = (rect2->height + rect2->y0) - rect1->y0;
+}
+
 /********************************************  END OF FILE  *******************************************/
 
 

@@ -49,7 +49,7 @@ void task_LEDTask(void *p_arg)
 	
 	/*  先获取一次系统时间,因为调用的是绝对延迟  */
 	xLastWakeTime = xTaskGetTickCount();
-	bsp_led_StartFlash(LED_ALL, 5, 50, LED_KEEP_FLASH);
+//	bsp_led_StartFlash(LED_ALL, 5, 50, LED_KEEP_FLASH);
 	
 	while(1)
 	{

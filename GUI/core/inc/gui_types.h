@@ -21,6 +21,7 @@
 # define GUI_EXTERN	extern
 # define TEXT_Handle	uint8_t
 # define WM_HWIN	int16_t 
+# define WIN_Handle	int8_t
 
 typedef enum
 {

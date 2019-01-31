@@ -32,6 +32,7 @@ struct WIDGET_OBJ
 	uint8_t layer;			/* 控件属于哪一层，代表控件显示顺序，该值越小，控件就处于越上面 */
 	uint16_t id;
 	uint16_t actKey;		/* 该控件响应的按键消息类型 */
+	
 	WIDGET_OBJ *pNext;	/* 兄弟控件 */
 	WIDGET_CALLBACK *_cb;
 	void *widgetData;			/* 控件数据 */
@@ -39,11 +40,11 @@ struct WIDGET_OBJ
 #pragma pack ()
 
 
-void widget_onPaint(const struct WIDGET_OBJ *pWidget);
+void widget_onPaint(struct WIDGET_OBJ *pWidget);
 WIDGET_OBJ *widget_getWidget(WIDGET_HANDLE hWidget, int16_t *err);
-void widget_sortList(WM_HWIN hParent);
+void widget_sortList(WIN_Handle hParent);
 GUI_ERROR widget_Delete(WIDGET_HANDLE hWidget);
-WIDGET_HANDLE widget_Create(WIDGET_TYPE widgetType, void *pObj, uint8_t id, uint16_t actKey, WIDGET_CALLBACK *_cb, WM_HWIN hParent);
+WIDGET_HANDLE widget_Create(WIDGET_TYPE widgetType, void *pObj, uint8_t id, uint16_t actKey, WIDGET_CALLBACK *_cb, WIN_Handle hParent);
 
 # endif
 

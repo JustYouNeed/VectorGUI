@@ -81,6 +81,7 @@
 .\object\display.o: ..\GUI\core\inc\gui_graph2.h
 .\object\display.o: ..\GUI\core\inc\gui_core.h
 .\object\display.o: ..\GUI\core\inc\gui_widget.h
+.\object\display.o: ..\GUI\core\inc\gui_win.h
 .\object\display.o: ..\GUI\core\inc\gui_wm.h
 .\object\display.o: ..\GUI\core\inc\gui_text.h
 .\object\display.o: ..\GUI\widget\inc\gui_menu.h

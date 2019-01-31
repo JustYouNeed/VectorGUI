@@ -28,7 +28,7 @@
 */
 static WM_MESSAGE msg[MSG_FIFO_SIZE];
 extern WM_HWIN hDesk;
-extern WM_OBJ *WM_Desktop;
+extern WIN_OBJ *WIN_Desktop;
 static uint16_t msgCnt = 0;
 
 /*
@@ -53,7 +53,7 @@ void msg_inputKey(MSG_KEY_INFO *keyInfo)
 	msg[msgCnt].key.keyStatus = keyInfo->keyStatus;
 	msg[msgCnt].key.keyValue = keyInfo->keyValue;
 	msg[msgCnt].data.p = (void *)keyInfo;
-	msg[msgCnt].hWin = WM_Desktop->hWin;
+	msg[msgCnt].hWin = WIN_Desktop->hWin;
 	msgCnt++;
 //	msg_sendMessage(hDesk, &msg[msgCnt]);
 //	msgCnt++;
@@ -148,7 +148,7 @@ void msg_process(void)
 {
 	if(msgCnt <= 0) return ; /* 没有消息需要处理 */
 	int16_t err = ERR_NONE;
-	WIDGET_OBJ *pObj = WM_Desktop->pWidget;
+	WIDGET_OBJ *pObj = WIN_Desktop->pWidget;
 	
 	msgCnt--;
 	
@@ -170,11 +170,11 @@ void msg_process(void)
 				pObj = pObj->pNext;
 			}
 		};break;
-		case MSG_PAINT:
-		{
-			pObj = widget_getWidget(pMsg->hWin, &err);
-			pObj->_cb(pMsg);
-		}
+//		case MSG_PAINT:
+//		{
+//			pObj = widget_getWidget(pMsg->hWin, &err);
+//			pObj->_cb(pMsg);
+//		}
 	}
 }
 

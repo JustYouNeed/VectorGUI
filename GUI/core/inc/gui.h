@@ -40,6 +40,7 @@
 # include "gui_graph2.h"
 # include "gui_core.h"
 # include "gui_widget.h"
+# include "gui_win.h"
 # include "gui_wm.h"
 # include "gui_text.h"
 
@@ -52,6 +53,7 @@
 
 
 extern GUI_CONTEXT GUI_Context;
+extern WIN_OBJ *WIN_Desktop;
 # endif
  
  

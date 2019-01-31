@@ -28,6 +28,7 @@ typedef struct
 
 
 void gui_Init(void);
+void gui_onPaint(void);
 void gui_clear(void);
 void gui_excute(void);
 void gui_clearRect(uint16_t x0, uint16_t y0, uint16_t width, uint16_t height);

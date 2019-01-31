@@ -59,7 +59,7 @@ void gui_gotoXY(uint16_t x, uint16_t y)
 void gui_Init(void)
 {
 	gui_deviceInit();
-	wm_Init();
+//	wm_Init();
 	
 	GUI_Context.curFont = GUI_FONT_ASCII_6X8;
 	GUI_Context.dispPosX = 0;
@@ -109,6 +109,26 @@ void gui_clearRect(uint16_t x0, uint16_t y0, uint16_t width, uint16_t height)
 	gui_fillRectangle(x0, y0, x0 + width, y0 + height, 0);
 }
 
+void gui_onPaint()
+{
+	if(WIN_Desktop == NULL) return ;
+	WIDGET_OBJ *pWidget = NULL;
+	/* 只绘制桌面 */
+	if(WIN_Desktop->isInvalid)	/* 只有在窗口无效的时候才需要绘制 */
+	{
+		gui_clear();
+		win_onPaint(WIN_Desktop);	/* 先绘制窗口 */
+		pWidget = WIN_Desktop->pWidget;	/* 获取控件链表表头 */
+		while(pWidget)		/* 遍历该窗口的控件,并重绘 */
+		{
+			widget_onPaint(pWidget);
+			pWidget = (pWidget->pNext);	/* 获取下一个控件 */
+		}
+		WIN_Desktop->isInvalid = false;	/* 窗口设置为有效 */
+		gui_Refresh();	/* 更新屏幕 */
+	}
+}
+
 /*
 *********************************************************************************************************
 *                      gui_excute                    
@@ -125,9 +145,9 @@ void gui_clearRect(uint16_t x0, uint16_t y0, uint16_t width, uint16_t height)
 void gui_excute(void)
 {
 //	gui_clear();
-//	wm_onPaint();
+	gui_onPaint();
 	msg_process();
-	gui_Refresh();	/* 更新屏幕 */
+//	gui_Refresh();	/* 更新屏幕 */
 }
 
 

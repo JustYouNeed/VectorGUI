@@ -26,7 +26,7 @@
 */
 static uint16_t wm_NumWindows = 0;
 static uint16_t wm_HWIN = 0;
-WM_HWIN hDesk = 0;
+//WM_HWIN hDesk = 0;
 WM_OBJ *WM_Desktop = NULL;
 
 
@@ -51,7 +51,7 @@ static WM_HWIN wm_addWindowToList(WM_OBJ *pWin)
 	{
 		pWin->pNext = WM_Desktop;
 		WM_Desktop = pWin;
-		hDesk = WM_Desktop->hWin;
+//		hDesk = WM_Desktop->hWin;
 		//发送重绘消息
 	}
 	else	/* 不需要立即显示则挂到第二个位置 */
@@ -112,7 +112,7 @@ WM_OBJ *wm_getWindowObject(WM_HWIN hWin, int16_t *err)
 */
 void wm_Init(void)
 {
-	hDesk = wm_Create(0, 0, LCD_X -1 , LCD_Y - 1, 1);
+//	hDesk = wm_Create(0, 0, LCD_X -1 , LCD_Y - 1, 1);
 }
 
 /*
@@ -233,21 +233,19 @@ void wm_onPaint(void)
 	if(WM_Desktop == NULL) return ;
 	
 	struct WIDGET_OBJ *pWidget = NULL;
-	
-//	gui_clear();
-	
+		
 	/* 只绘制桌面 */
 	if(WM_Desktop->pWidget)	/* 如果该窗口下面存在控件，则需要绘制控件 */
 	{
 		pWidget = WM_Desktop->pWidget;	/* 获取控件链表表头 */
 		while(pWidget)		/* 遍历该窗口的控件,并重绘 */
 		{
-			msg_sendMsgNoData(pWidget->id, MSG_PAINT);
-//			widget_onPaint(pWidget);
+//			msg_sendMsgNoData(pWidget->id, MSG_PAINT);
+			widget_onPaint(pWidget);
 			pWidget = (struct WIDGET_OBJ *)(pWidget->pNext);	/* 获取下一个控件 */
 		}
 	}
-//	gui_Refresh();	/* 更新屏幕 */
+	gui_Refresh();	/* 更新屏幕 */
 }
 
 /*

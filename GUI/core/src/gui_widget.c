@@ -67,10 +67,10 @@ WIDGET_OBJ *widget_getWidget(WIDGET_HANDLE hWidget, int16_t *err)
 		return NULL;	/* 参数错误 */
 	}
 	
-	WM_OBJ *pWin = NULL;
+	WIN_OBJ *pWin = NULL;
 	WIDGET_OBJ *pWidget = NULL;
 	
-	pWin = wm_getWindowObject(GUI_GET_HPARENT(hWidget), err);	/* 得到该控件的父窗口 */
+	pWin = win_getObject(GUI_GET_HPARENT(hWidget), err);	/* 得到该控件的父窗口 */
 	if(!pWin || !pWin->pWidget) return NULL;	/* 获取父窗口失败或者该窗口下没有控件都返回失败 */
 	
 	/* 查找控件 */
@@ -102,14 +102,14 @@ WIDGET_OBJ *widget_getWidget(WIDGET_HANDLE hWidget, int16_t *err)
 * Note(s)    : None.
 *********************************************************************************************************
 */
-WIDGET_HANDLE widget_Create(WIDGET_TYPE widgetType, void *pObj, uint8_t id, uint16_t actKey, WIDGET_CALLBACK *_cb, WM_HWIN hParent)
+WIDGET_HANDLE widget_Create(WIDGET_TYPE widgetType, void *pObj, uint8_t id, uint16_t actKey, WIDGET_CALLBACK *_cb, WIN_Handle hParent)
 {
 	WIDGET_OBJ *pWidget = NULL, *widgetTemp = NULL;
-	WM_OBJ *pWin;
+	WIN_OBJ *pWin = NULL;
+	uint8_t widgetLayer = 0;
 	int16_t err = ERR_NONE;
 	
-	if(!hParent) return 0;
-	if(!pObj) return 0;
+	if(!hParent || !pObj) return 0;
 	
 	/* 首先为控件申请内存 */
 	pWidget = (struct WIDGET_OBJ*)bsp_mem_Alloc(SRAMIN, sizeof(struct WIDGET_OBJ));
@@ -117,31 +117,21 @@ WIDGET_HANDLE widget_Create(WIDGET_TYPE widgetType, void *pObj, uint8_t id, uint
 	
 	pWidget->type = widgetType;
 	pWidget->id = ((hParent << 10) | (widgetType << 6) | (id << 0));
-	pWidget->pNext = NULL;
+	pWidget->pNext = NULL;	
 	pWidget->actKey = actKey;
 	pWidget->_cb = _cb;
-	
 	pWidget->widgetData = (void *)pObj;
-//	/* 根据控件类型设置控件数据区 */
-//	switch(widgetType)
-//	{
-//		case WIDGET_BUTTON:pWidget->widgetData = (BUTTON_OBJ*)pObj;	break;
-//		case WIDGET_CHECKBOX: pWidget->widgetData = (CHECKBOX_OBJ*)pObj;	break;
-//		case WIDGET_MENU:pWidget->widgetData = (MENU_OBJ*)pObj;	break;
-//		case WIDGET_PROGBAR:pWidget->widgetData = (PROGBAR_OBJ*)pObj;	break;
-//		case WIDGET_SCROLLBAR:pWidget->widgetData = (SCROLLBAR_OBJ*)pObj;	break;
-//		case WIDGET_WINDOW:pWidget->widgetData = (WINDOW_OBJ*)pObj;	break;
-//	}
 		
 	/* 将控件挂载到窗口上 */
-	pWin = wm_getWindowObject(hParent, &err);	/* 得到父窗口的结构体指针 */
+	pWin = win_getObject(hParent, &err);	/* 得到父窗口的结构体指针 */
 	
-	pWidget->layer = pWin->noOfWidget;		/* 设置控件的层 */
 	pWin->noOfWidget++;		/* 该窗口下的控件数量增加 */
-
+	pWin->isInvalid = true;
+	
 	if(pWin->pWidget == NULL)	/* 如果该窗口当前没有控件,就挂接该控件 */
 	{
 		pWin->pWidget = pWidget;
+		widgetLayer++;		
 	}
 	else
 	{
@@ -149,10 +139,11 @@ WIDGET_HANDLE widget_Create(WIDGET_TYPE widgetType, void *pObj, uint8_t id, uint
 		while(widgetTemp->pNext)	/* 查找表尾 */
 		{
 			widgetTemp = (struct WIDGET_OBJ *)(widgetTemp->pNext);
+			widgetLayer++;
 		}
 		widgetTemp->pNext = (struct WIDGET_OBJ*)pWidget;	/* 将该控件挂接到父窗口控件链表上 */
 	}
-	
+	pWidget->layer = widgetLayer; /* 设置控件的层 */
 	return pWidget->id;
 }
 
@@ -172,11 +163,14 @@ WIDGET_HANDLE widget_Create(WIDGET_TYPE widgetType, void *pObj, uint8_t id, uint
 GUI_ERROR widget_Delete(WIDGET_HANDLE hWidget)
 {
 	WIDGET_OBJ *preObj	= NULL, *lstObj = NULL;
-	WM_OBJ *pObj = NULL;
+	WIN_OBJ *pObj = NULL;
 	int16_t err = ERR_NONE;
+	WIN_Handle hWin = (hWidget >> 10);
 	
 	/* 获取该控件的父窗口 */
-	pObj = wm_getWindowObject(hWidget >> 10, &err);
+	pObj = win_getObject(hWin, &err);
+	pObj->isInvalid = true;
+	
 	if(!pObj) return ERR_PARA;
 	lstObj = preObj = pObj->pWidget;
 	
@@ -223,44 +217,51 @@ GUI_ERROR widget_Delete(WIDGET_HANDLE hWidget)
 * Note(s)    : None.
 *********************************************************************************************************
 */
-void widget_onPaint(const struct WIDGET_OBJ *pWidget)
+void widget_onPaint(struct WIDGET_OBJ *pWidget)
 {
-//	if(!pWidget) return ;
-//	
-//	/* 根据控件类型选择不同的绘制函数 */
-//	switch(pWidget->type)
-//	{
-//		case WIDGET_BUTTON: 	/* 按钮 */
-//		{
-//			BUTTON_OBJ *pButton = (BUTTON_OBJ*)(pWidget->widgetData);	/* 得到按键结构体 */
-////			button_onPaint(pButton);		/* 绘制按键 */
-//		}break;
-//		case WIDGET_CHECKBOX:
-//		{
-//			CHECKBOX_OBJ *pCheckbox = (CHECKBOX_OBJ *)(pWidget->widgetData);
-//			checkbox_onPaint(pCheckbox);
-//		}break;
-//		case WIDGET_MENU:
-//		{
-//			MENU_OBJ *pMenu = (MENU_OBJ *)(pWidget->widgetData);
-//			menu_onPaint(pMenu);
-//		}break;
-//		case WIDGET_PROGBAR:
-//		{
-//			PROGBAR_OBJ *pProgbar = (PROGBAR_OBJ *)(pWidget->widgetData);
-//			progbar_onPaint(pProgbar);
-//		}break;
-//		case WIDGET_SCROLLBAR:
-//		{
-//			SCROLLBAR_OBJ *pScrollbar = (SCROLLBAR_OBJ *)(pWidget->widgetData);
-//			scrollbar_onPaint(pScrollbar);
-//		}break;
-//		case WIDGET_WINDOW:		/* window控件 */
-//		{
-//			WINDOW_OBJ *pWindow = (WINDOW_OBJ *)(pWidget->widgetData);
-//			window_onPaint(pWindow);
-//		}break;
-//	}
+	if(!pWidget) return ;
+	int16_t err = ERR_NONE;
+	WIN_OBJ *pWin = win_getObject((pWidget->id >> 10), &err);
+	
+	GUI_Context.drawRect.x0 = pWin->clientRect.x0;
+	GUI_Context.drawRect.y0 = pWin->clientRect.y0;
+	GUI_Context.drawRect.height = pWin->clientRect.height;
+	GUI_Context.drawRect.width = pWin->clientRect.width;
+	
+	/* 根据控件类型选择不同的绘制函数 */
+	switch(pWidget->type)
+	{
+		case WIDGET_BUTTON: 	/* 按钮 */
+		{
+			BUTTON_OBJ *pButton = (BUTTON_OBJ*)(pWidget->widgetData);	/* 得到按键结构体 */
+			button_onPaint(pButton);		/* 绘制按键 */
+		}break;
+		case WIDGET_CHECKBOX:
+		{
+			CHECKBOX_OBJ *pCheckbox = (CHECKBOX_OBJ *)(pWidget->widgetData);
+			checkbox_onPaint(pCheckbox);
+		}break;
+		case WIDGET_MENU:
+		{
+			MENU_OBJ *pMenu = (MENU_OBJ *)(pWidget->widgetData);
+			menu_onPaint(pMenu);
+		}break;
+		case WIDGET_PROGBAR:
+		{
+			PROGBAR_OBJ *pProgbar = (PROGBAR_OBJ *)(pWidget->widgetData);
+			progbar_onPaint(pProgbar);
+		}break;
+		case WIDGET_SCROLLBAR:
+		{
+			SCROLLBAR_OBJ *pScrollbar = (SCROLLBAR_OBJ *)(pWidget->widgetData);
+			scrollbar_onPaint(pScrollbar);
+		}break;
+		case WIDGET_WINDOW:		/* window控件 */
+		{
+			WINDOW_OBJ *pWindow = (WINDOW_OBJ *)(pWidget->widgetData);
+			window_onPaint(pWindow);
+		}break;
+	}
 }
 
 /********************************************  END OF FILE  *******************************************/

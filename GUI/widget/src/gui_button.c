@@ -24,7 +24,6 @@
 */
 # include "gui.h"
 
-
 /*
 *********************************************************************************************************
 *                        button_onPaint                  
@@ -38,14 +37,11 @@
 * Note(s)    : None.
 *********************************************************************************************************
 */
-static void _onPaint(const BUTTON_OBJ* pButton)
+void button_onPaint(BUTTON_OBJ *pButton)
 {
 	int16_t XOffset = 0, YOffset = 0;
 	
-	GUI_Context.drawRect.x0 = pButton->rect.x0;
-	GUI_Context.drawRect.y0 = pButton->rect.y0;
-	GUI_Context.drawRect.width = pButton->rect.width;
-	GUI_Context.drawRect.height = pButton->rect.height;
+	gui_rectCrop(&GUI_Context.drawRect, &pButton->rect);
 	
 	gui_fillRectangle(pButton->rect.x0, pButton->rect.y0, pButton->rect.x0 + pButton->rect.width, pButton->rect.y0 + pButton->rect.height, 0);
 	
@@ -100,6 +96,7 @@ static void _onPaint(const BUTTON_OBJ* pButton)
 		gui_dispString(pButton->title, 0);
 	}
 }
+
 
 /*
 *********************************************************************************************************
@@ -187,41 +184,35 @@ static void button_defaultProc(WM_MESSAGE *pMsg)
 			if(key->keyValue & pWidget->actKey)
 			{
 				if(key->keyStatus == KEY_PRESS) /* 如果按键按下了 */
-				{
 					pButton->isPress = true; 
-					msg_sendMsgNoData(hObj, MSG_PAINT);	/* 发送重绘消息 */
-					if(pButton->_cb) pButton->_cb(pMsg);
-				}
 				else if(key->keyStatus == KEY_RELEASED)	/* 按键释放了 */
-				{
 					pButton->isPress = false;
-					msg_sendMsgNoData(hObj, MSG_PAINT);		/* 发送重绘消息 */
-				}
+				
+				/* 绘制按钮按下的状态 */
+				win_Invalidation(pWidget->id >> 10);
+				gui_onPaint();
+				if(pButton->_cb) pButton->_cb(pMsg);
 			}
-		}break;
-		case MSG_PAINT: 	/* 按键重绘消息 */
-		{
-			_onPaint(pButton);	/* 重绘 */
 		}break;
 		case MSG_DELETE:	/* 删除按键消息 */
 		{
 			_delete(hObj);
 		}break;
-		default: wm_defaultProc(pMsg);
 	}
 }
 
 /*
 *********************************************************************************************************
-*                                          
+*                        button_setCallback                  
 *
-* Description: 
+* Description: 设置按钮的回调函数,在按钮按下或者释放的时候回调函数将会被调用
 *             
-* Arguments  : 
+* Arguments  : hButton: 按钮的句柄
+*							 *_cb: 回调函数
 *
-* Reutrn     : 
+* Reutrn     : None.
 *
-* Note(s)    : 
+* Note(s)    : None.
 *********************************************************************************************************
 */
 void button_setCallback(BUTTON_Handle hButton, BUTTON_CALLBACK *_cb)
@@ -401,7 +392,7 @@ GUI_ERROR button_getTextAlign(BUTTON_Handle hButton)
 * Note(s)    : None.
 *********************************************************************************************************
 */
-BUTTON_Handle button_Create(uint16_t x0, uint16_t y0, uint16_t width, uint16_t height, uint16_t id, uint8_t *title, uint16_t actKey, WM_HWIN hParent)
+BUTTON_Handle button_Create(uint16_t x0, uint16_t y0, uint16_t width, uint16_t height, uint16_t id, uint8_t *title, uint16_t actKey, WIN_Handle hParent)
 {
 	int16_t r = 0;
 	BUTTON_OBJ *pButton;
@@ -423,7 +414,7 @@ BUTTON_Handle button_Create(uint16_t x0, uint16_t y0, uint16_t width, uint16_t h
 	
 	r = widget_Create(WIDGET_BUTTON, pButton, id, actKey, button_defaultProc, hParent);
 	
-	msg_sendMsgNoData(r, MSG_PAINT);	/* 创建完成后发送一个重绘消息 */
+//	msg_sendMsgNoData(r, MSG_PAINT);	/* 创建完成后发送一个重绘消息 */
 	return r;
 }
 
@@ -443,7 +434,7 @@ BUTTON_Handle button_Create(uint16_t x0, uint16_t y0, uint16_t width, uint16_t h
 * Note(s)    : None.
 *********************************************************************************************************
 */
-BUTTON_Handle button_CreateEx(BUTTON_OBJ *pButton, uint8_t id, uint16_t actKey, WM_HWIN hParent)
+BUTTON_Handle button_CreateEx(BUTTON_OBJ *pButton, uint8_t id, uint16_t actKey, WIN_Handle hParent)
 {
 	if(!hParent) return 0;
 	

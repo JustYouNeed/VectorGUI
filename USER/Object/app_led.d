@@ -81,6 +81,7 @@
 .\object\app_led.o: ..\GUI\core\inc\gui_graph2.h
 .\object\app_led.o: ..\GUI\core\inc\gui_core.h
 .\object\app_led.o: ..\GUI\core\inc\gui_widget.h
+.\object\app_led.o: ..\GUI\core\inc\gui_win.h
 .\object\app_led.o: ..\GUI\core\inc\gui_wm.h
 .\object\app_led.o: ..\GUI\core\inc\gui_text.h
 .\object\app_led.o: ..\GUI\widget\inc\gui_menu.h

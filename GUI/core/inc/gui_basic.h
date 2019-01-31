@@ -45,6 +45,7 @@ void gui_fillEllipse(uint16_t x, uint16_t y, uint16_t a, uint16_t b, GUI_COLOR c
 void gui_drawSector(uint16_t x, uint16_t y, uint16_t r, uint16_t startAngle, uint16_t endAngle, GUI_COLOR color);
 void gui_fillSector(uint16_t x, uint16_t y, uint16_t r, uint16_t startAngle, uint16_t endAngle, GUI_COLOR color);
 
+void gui_rectCrop(GUI_RECT *rect1, GUI_RECT *rect2);
 #endif
 
 /********************************************  END OF FILE  *******************************************/

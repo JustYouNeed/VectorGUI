@@ -24,6 +24,25 @@
 */
 # include "gui.h"
 
+void window_onPaint(const WINDOW_OBJ *pWindow)
+{
+	int16_t XOffset = 0, YOffset = 0;
+	
+	GUI_Context.drawRect.x0 = pWindow->rect.x0;
+	GUI_Context.drawRect.y0 = pWindow->rect.y0;
+	GUI_Context.drawRect.width = pWindow->rect.width;
+	GUI_Context.drawRect.height = pWindow->rect.height;
+	
+	gui_fillRectangle(pWindow->rect.x0, pWindow->rect.y0, pWindow->rect.x0 + pWindow->rect.width, pWindow->rect.y0 + 14, 1);
+	gui_drawRectangle(pWindow->rect.x0, pWindow->rect.y0, pWindow->rect.x0 + pWindow->rect.width, pWindow->rect.y0 + pWindow->rect.height, 1);
+	
+	XOffset = (pWindow->rect.width - 6*gui_getStringLen(pWindow->title))/2;
+	YOffset = (14 - font_getYSize(GUI_Context.curFont))/2;
+	
+	gui_gotoXY(pWindow->rect.x0 + XOffset, pWindow->rect.y0 + YOffset);
+	gui_dispString(pWindow->title, 0);
+}
+
 /*
 *********************************************************************************************************
 *                       _getObj                   

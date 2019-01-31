@@ -641,16 +641,6 @@
               <FilePath>..\GUI\core\src\gui_font.c</FilePath>
             </File>
             <File>
-              <FileName>gui_text.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\GUI\core\src\gui_text.c</FilePath>
-            </File>
-            <File>
-              <FileName>gui_wm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\GUI\core\src\gui_wm.c</FilePath>
-            </File>
-            <File>
               <FileName>gui_widget.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\GUI\core\src\gui_widget.c</FilePath>
@@ -664,6 +654,16 @@
               <FileName>gui_mem.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\GUI\core\src\gui_mem.c</FilePath>
+            </File>
+            <File>
+              <FileName>gui_win.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\GUI\core\src\gui_win.c</FilePath>
+            </File>
+            <File>
+              <FileName>gui_key.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\GUI\core\src\gui_key.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -686,19 +686,24 @@
               <FilePath>..\GUI\widget\src\gui_progbar.c</FilePath>
             </File>
             <File>
-              <FileName>gui_scrollbar.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\GUI\widget\src\gui_scrollbar.c</FilePath>
-            </File>
-            <File>
               <FileName>gui_window.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\GUI\widget\src\gui_window.c</FilePath>
             </File>
             <File>
+              <FileName>gui_scrollbar.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\GUI\widget\src\gui_scrollbar.c</FilePath>
+            </File>
+            <File>
               <FileName>gui_checkbox.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\GUI\widget\src\gui_checkbox.c</FilePath>
+            </File>
+            <File>
+              <FileName>gui_text.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\GUI\core\src\gui_text.c</FilePath>
             </File>
           </Files>
         </Group>
