@@ -16,6 +16,8 @@
 # ifndef __GUI_PROGBAR_H
 # define __GUI_PROGBAR_H
 
+# include "gui_com.h"
+
 # define PROGBAR_Handle	int16_t
 typedef struct PROGBAR_OBJ PROGBAR_OBJ;
 

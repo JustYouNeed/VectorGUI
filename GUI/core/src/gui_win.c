@@ -18,7 +18,11 @@
   *                              INCLUDE FILES
   *******************************************************************************************************
 */
-# include "gui.h"
+# include "gui_win.h"
+# include "gui_text.h"
+# include "gui_core.h"
+# include "gui_mem.h"
+
 
 /*
   *******************************************************************************************************
@@ -44,13 +48,13 @@ WIN_OBJ *WIN_Desktop = NULL, *WIN_HEAD = NULL;
 void win_onPaint(const WIN_OBJ *pWin)
 {
 	int16_t XOffset = 0, YOffset = 0;
+		
+	if(pWin->flag & GUI_CF_FULL) return ;	/* 如果是全屏模式则不需要绘制标题 */
 	
 	GUI_Context.drawRect.x0 = pWin->rect.x0;
 	GUI_Context.drawRect.y0 = pWin->rect.y0;
 	GUI_Context.drawRect.width = pWin->rect.width;
 	GUI_Context.drawRect.height = pWin->rect.height;
-	
-	if(pWin->flag & GUI_CF_FULL) return ;	/* 如果是全屏模式则不需要绘制标题 */
 	
 	gui_fillRectangle(pWin->rect.x0, pWin->rect.y0, pWin->rect.x0 + pWin->rect.width, pWin->rect.y0 + 14, 1);
 	gui_drawRectangle(pWin->rect.x0, pWin->rect.y0, pWin->rect.x0 + pWin->rect.width, pWin->rect.y0 + pWin->rect.height, 1);
@@ -167,15 +171,15 @@ void win_Invalidation(WIN_Handle hWin)
 */
 WIN_Handle win_Create(uint8_t id, uint8_t *title, GUI_CF_FALG flag)
 {
-	WIN_OBJ *pWin = (WIN_OBJ*)bsp_mem_Alloc(SRAMIN, sizeof(WIN_OBJ));	/* 先申请内存 */
+	WIN_OBJ *pWin = (WIN_OBJ*)gui_memAlloc(sizeof(WIN_OBJ));	/* 先申请内存 */
 	
 	if(!pWin) return -1;	/* 内存申请失败直接返回 */
 	
 	/* 设置窗口大小,在初始版本中，窗口大小则为屏幕大小 */
 	pWin->rect.x0 = 0;
 	pWin->rect.y0 = 0;
-	pWin->rect.width = LCD_X - 1;
-	pWin->rect.height = LCD_Y - 1;
+	pWin->rect.width = LCD_MAX_X - 1;
+	pWin->rect.height = LCD_MAX_Y - 1;
 	pWin->title = title;
 	pWin->noOfWidget = 0;		/* 初始控件数量为0 */
 	pWin->pNext = NULL;	/* 下一个窗口为空 */
@@ -225,42 +229,41 @@ int16_t win_Delete(WIN_Handle *hWin)
 	if(!hWin) return ERR_PARA;
 	int16_t err = ERR_NONE;
 	
-	WIN_OBJ *preObj = NULL, *lstObj = NULL;
+	WIN_OBJ *preWin = NULL, *lstWin = NULL;
 		
 	if(WIN_HEAD->hWin == *hWin)	/* 要删除的窗口就是表头 */
 	{
-		lstObj = WIN_HEAD;
-		while(lstObj->pWidget)	/* 需要先删除该窗口下的控件 */
-		{
-			widget_Delete(lstObj->pWidget->id);	/*删除该窗口下的控件 */
-		}
+		lstWin = WIN_HEAD;
 		WIN_HEAD = WIN_HEAD->pNext;	/* 将桌面窗口指向下一个窗口就行了 */
 	}
 	else
 	{
-		preObj = WIN_HEAD;
-		lstObj = WIN_HEAD->pNext;
-		while(lstObj)
+		preWin = WIN_HEAD;
+		lstWin = WIN_HEAD->pNext;
+		while(lstWin)
 		{
-			if(lstObj->hWin == *hWin)	/* 已经找到了目标窗口 */
+			if(lstWin->hWin == *hWin)	/* 已经找到了目标窗口 */
 			{
-				preObj->pNext = lstObj->pNext;	/* 将该窗口节点从链表中断开 */
+				preWin->pNext = lstWin->pNext;	/* 将该窗口节点从链表中断开 */
 				break;
 			}
-			preObj = lstObj;	/* 保存上一个窗口 */
-			lstObj = lstObj->pNext;	/* 指向下一个窗口 */
-		}
-		
-		while(lstObj->pWidget)	/* 需要先删除该窗口下的控件 */
-		{
-			widget_Delete(lstObj->pWidget->id);	/*删除该窗口下的控件 */
+			preWin = lstWin;	/* 保存上一个窗口 */
+			lstWin = lstWin->pNext;	/* 指向下一个窗口 */
 		}
 	}
 	
 	/* 如果找到了节点 */
-	if(lstObj)
+	if(lstWin)
 	{
-		bsp_mem_Free(SRAMIN, lstObj);	/* 释放内存 */
+		WIDGET_OBJ *pWidget = lstWin->pWidget;
+		while(pWidget)	/* 需要先删除该窗口下的控件 */
+		{
+			WIDGET_OBJ *pTemp = pWidget->pNext;
+			widget_Delete(pWidget->id);	/*删除该窗口下的控件 */
+			pWidget = pTemp;
+		}
+		gui_memFree(lstWin);	/* 释放内存 */
+		GUI_NumWindows--;
 		*hWin = 0;
 		return 0;
 	}
@@ -287,9 +290,12 @@ int16_t win_boringToTop(WIN_Handle hWin)
 		return -1;
 	int16_t err = ERR_NONE;
 	
-	WIN_Desktop = win_getObject(hWin, &err);	
-	WIN_Desktop->isInvalid = true;	/* 窗口无效化，需要重绘 */
-	
+	WIN_OBJ *pWin = win_getObject(hWin, &err);	
+	if(pWin)
+	{
+		WIN_Desktop = pWin;
+		WIN_Desktop->isInvalid = true;	/* 窗口无效化，需要重绘 */		
+	}
 	return err;
 }
 

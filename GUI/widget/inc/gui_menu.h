@@ -16,12 +16,15 @@
 # ifndef __GUI_MENU_H
 # define __GUI_MENU_H
 
+# include "gui_com.h"
+
+
 # define MENU_Handle	uint16_t
 typedef struct MENU_OBJ MENU_OBJ;
 typedef struct MENUNODE_OBJ MENUNODE_OBJ;
 
 typedef void *(pMENU_CALLBACK)(void *p_arg);
-typedef void MENU_CALLBACK(WM_MESSAGE *p_arg);
+typedef void MENU_CALLBACK(void );
 
 /* 菜单结构体定义 */
 struct MENU_OBJ

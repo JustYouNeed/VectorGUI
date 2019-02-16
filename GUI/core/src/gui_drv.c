@@ -4,7 +4,7 @@
   * Author: Vector
   * Version: V1.0.0
   * Date: 2018-12-29
-  * Brief: GUI底层驱动文件,根据用户实际情况修改，本文件参考正点原子遥控中采用的GUI结构,原作者为黄绍斌
+  * Brief: GUI底层驱动文件,根据用户实际情况修改
   *******************************************************************************************************
   * History
   *		1.Author: Vector
@@ -18,7 +18,8 @@
   *                              INCLUDE FILES
   *******************************************************************************************************
 */
-# include "gui.h"
+# include "gui_drv.h"
+# include "gui_core.h"
 # include "bsp.h"
 /*
 *********************************************************************************************************
@@ -54,7 +55,7 @@ void gui_deviceInit(void)
 */
 void gui_fillSCR(GUI_COLOR color)
 {
-	bsp_oled_Fill(0, 0, LCD_X - 1, LCD_Y - 1, color);
+	bsp_oled_Fill(0, 0, LCD_MAX_X - 1, LCD_MAX_Y - 1, color);
 }
 
 /*
@@ -136,45 +137,6 @@ void gui_Refresh(void)
 	bsp_oled_Refresh();
 }
 
-
-/*
-*********************************************************************************************************
-*                           gui_keyInput               
-*
-* Description: 
-*             
-* Arguments  : 
-*
-* Reutrn     : 
-*
-* Note(s)    : 
-*********************************************************************************************************
-*/
-void gui_keyInput(void)
-{
-	static uint16_t preKeyValue = 0x01;
-	uint16_t nowKeyValue = 0, keyId = 0;
-	MSG_KEY_INFO keyInfo;
-	
-	uint16_t keyValue = 0, msgKeyValue = 0;
-	
-	nowKeyValue = bsp_key_GetKey();
-	if(nowKeyValue == KEY_NONE) return ;
-	
-	keyId = nowKeyValue >> 8;
-	
-	
-	keyInfo.keyValue = 0x01 << keyId;
-	/* 如果上次有按键按下这次没有，说明按键已经释放 */
-	if(((preKeyValue & 0x02) != 0x02) && ((nowKeyValue & 0x02) == 0x02))
-	{
-		keyInfo.keyStatus = KEY_RELEASED;
-		msg_inputKey(&keyInfo);
-		return ;
-	}
-	keyInfo.keyStatus = KEY_PRESS;
-	msg_inputKey(&keyInfo);
-}
 
 
 /********************************************  END OF FILE  *******************************************/

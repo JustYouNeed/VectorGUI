@@ -16,14 +16,17 @@
 # ifndef __GUI_CONF_H
 # define __GUI_CONF_H
 
+# define LCD_MAX_X	127
+# define LCD_MAX_Y  63
 
 /* 是否使用Bresenham算法画线，如果为0，则调用DDA算法 */
 # define GUI_DRAW_LINE_BRESE	1u
 
 # define GUI_OS_SUPPORT		0u
 
-
 # define GUI_MEM_SIZE		16*1024
+
+# define GUI_KEY_FIFO_SIZE		16
 
 # endif
 

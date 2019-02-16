@@ -18,9 +18,23 @@
   *                              INCLUDE FILES
   *******************************************************************************************************
 */
-# include "gui.h"
+# include "gui_text.h"
+# include "gui_core.h"
 
 
+/*
+*********************************************************************************************************
+*                                          
+*
+* Description: 
+*             
+* Arguments  : 
+*
+* Reutrn     : 
+*
+* Note(s)    : 
+*********************************************************************************************************
+*/
 uint16_t gui_getStringLen(const uint8_t *str)
 {
 	uint16_t len = 0;
@@ -144,7 +158,7 @@ void gui_dispString(uint8_t *str, uint8_t mode)
 	
 	while(*str)
 	{
-		if((GUI_Context.dispPosX + XSize) < LCD_X - 1) 
+		if((GUI_Context.dispPosX + XSize) < LCD_MAX_X - 1) 
 		{
 			gui_dispChar(*str++, mode);
 			gui_gotoXY(GUI_Context.dispPosX + XSize, GUI_Context.dispPosY);

@@ -16,6 +16,8 @@
 # ifndef __GUI_CHECKBOX_H
 # define __GUI_CHECKBOX_H
 
+# include "gui_com.h"
+
 # define CHECKBOX_Handle	int16_t
 typedef struct CHECKBOX_OBJ CHECKBOX_OBJ;
 

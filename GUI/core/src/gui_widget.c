@@ -22,29 +22,10 @@
   *                              INCLUDE FILES
   *******************************************************************************************************
 */
-# include "gui.h"
-
-
-///*
-//*********************************************************************************************************
-//*                                          
-//*
-//* Description: 
-//*             
-//* Arguments  : 
-//*
-//* Reutrn     : 
-//*
-//* Note(s)    : 
-//*********************************************************************************************************
-//*/
-//void widget_sortList(WM_HWIN hParent)
-//{
-//	WM_OBJ *pWin = NULL;
-//	int16_t err = ERR_NONE;
-//	
-//	pWin = wm_getWindowObject(GUI_GET_HPARENT(hWidget), err);	/* 得到该控件的父窗口 */
-//}
+# include "gui_widget.h"
+# include "gui_mem.h"
+# include "gui_win.h"
+# include "gui_core.h"
 
 /*
 *********************************************************************************************************
@@ -59,7 +40,7 @@
 * Note(s)    : None.
 *********************************************************************************************************
 */
-WIDGET_OBJ *widget_getWidget(WIDGET_HANDLE hWidget, int16_t *err)
+WIDGET_OBJ *widget_getWidget(WIDGET_Handle hWidget, int16_t *err)
 {
 	if(!hWidget) 
 	{
@@ -89,9 +70,9 @@ WIDGET_OBJ *widget_getWidget(WIDGET_HANDLE hWidget, int16_t *err)
 
 /*
 *********************************************************************************************************
-*                         widget_addToParent                 
+*                         widget_Create                 
 *
-* Description: 将控件挂载到父窗口上
+* Description: 创建一个控件
 *             
 * Arguments  : widgetType: 控件类型
 *							 *pObj: 具体控件指针
@@ -102,48 +83,48 @@ WIDGET_OBJ *widget_getWidget(WIDGET_HANDLE hWidget, int16_t *err)
 * Note(s)    : None.
 *********************************************************************************************************
 */
-WIDGET_HANDLE widget_Create(WIDGET_TYPE widgetType, void *pObj, uint8_t id, uint16_t actKey, WIDGET_CALLBACK *_cb, WIN_Handle hParent)
+WIDGET_Handle widget_Create(WIDGET_TYPE widgetType, WIDGET_OBJ *pWidget, uint8_t id, uint16_t actKey, WIDGET_CALLBACK *_cb, WIN_Handle hParent)
 {
-	WIDGET_OBJ *pWidget = NULL, *widgetTemp = NULL;
+	WIDGET_OBJ *widgetTemp = NULL;
 	WIN_OBJ *pWin = NULL;
 	uint8_t widgetLayer = 0;
 	int16_t err = ERR_NONE;
-	
-	if(!hParent || !pObj) return 0;
-	
-	/* 首先为控件申请内存 */
-	pWidget = (struct WIDGET_OBJ*)bsp_mem_Alloc(SRAMIN, sizeof(struct WIDGET_OBJ));
-	if(!pWidget) return 0;
-	
-	pWidget->type = widgetType;
-	pWidget->id = ((hParent << 10) | (widgetType << 6) | (id << 0));
-	pWidget->pNext = NULL;	
-	pWidget->actKey = actKey;
-	pWidget->_cb = _cb;
-	pWidget->widgetData = (void *)pObj;
+
+	if(!hParent || !pWidget) return 0;
 		
+	/* 填写控件参数 */
+	{
+		pWidget->type = widgetType;
+		pWidget->id = ((hParent << 10) | (widgetType << 6) | (id << 0));
+		pWidget->pNext = NULL;	
+		pWidget->actKey = actKey;
+		pWidget->_cb = _cb;
+		pWidget->layer = widgetLayer; /* 设置控件的层 */
+	}
+	
 	/* 将控件挂载到窗口上 */
-	pWin = win_getObject(hParent, &err);	/* 得到父窗口的结构体指针 */
-	
-	pWin->noOfWidget++;		/* 该窗口下的控件数量增加 */
-	pWin->isInvalid = true;
-	
-	if(pWin->pWidget == NULL)	/* 如果该窗口当前没有控件,就挂接该控件 */
 	{
-		pWin->pWidget = pWidget;
-		widgetLayer++;		
-	}
-	else
-	{
-		widgetTemp = (pWin->pWidget);	/* 得到该窗口的控件链表 */
-		while(widgetTemp->pNext)	/* 查找表尾 */
+		pWin = win_getObject(hParent, &err);	/* 得到父窗口的结构体指针 */
+		
+		pWin->noOfWidget++;		/* 该窗口下的控件数量增加 */
+		pWin->isInvalid = true;
+		
+		if(pWin->pWidget == NULL)	/* 如果该窗口当前没有控件,就挂接该控件 */
 		{
-			widgetTemp = (struct WIDGET_OBJ *)(widgetTemp->pNext);
-			widgetLayer++;
+			pWin->pWidget = pWidget;
+			widgetLayer++;		
 		}
-		widgetTemp->pNext = (struct WIDGET_OBJ*)pWidget;	/* 将该控件挂接到父窗口控件链表上 */
+		else
+		{
+			widgetTemp = (pWin->pWidget);	/* 得到该窗口的控件链表 */
+			while(widgetTemp->pNext)	/* 查找表尾 */
+			{
+				widgetTemp = (struct WIDGET_OBJ *)(widgetTemp->pNext);
+				widgetLayer++;
+			}
+			widgetTemp->pNext = (struct WIDGET_OBJ*)pWidget;	/* 将该控件挂接到父窗口控件链表上 */
+		}
 	}
-	pWidget->layer = widgetLayer; /* 设置控件的层 */
 	return pWidget->id;
 }
 
@@ -160,45 +141,44 @@ WIDGET_HANDLE widget_Create(WIDGET_TYPE widgetType, void *pObj, uint8_t id, uint
 * Note(s)    : 删除成功为控件句柄会清零
 *********************************************************************************************************
 */
-GUI_ERROR widget_Delete(WIDGET_HANDLE hWidget)
+GUI_ERROR widget_Delete(WIDGET_Handle hWidget)
 {
-	WIDGET_OBJ *preObj	= NULL, *lstObj = NULL;
-	WIN_OBJ *pObj = NULL;
+	WIDGET_OBJ *preWidget	= NULL, *lstWidget = NULL;
+	WIN_OBJ *pWin = NULL;
 	int16_t err = ERR_NONE;
-	WIN_Handle hWin = (hWidget >> 10);
+	WIN_Handle hWin = GUI_GET_HPARENT(hWidget);
 	
 	/* 获取该控件的父窗口 */
-	pObj = win_getObject(hWin, &err);
-	pObj->isInvalid = true;
+	pWin = win_getObject(hWin, &err);
+	pWin->isInvalid = true;
 	
-	if(!pObj) return ERR_PARA;
-	lstObj = preObj = pObj->pWidget;
+	if(!pWin) return ERR_PARA;
+	lstWidget = preWidget = pWin->pWidget;
 	
 	/* 如果是第一个控件 */
-	if(preObj->id == hWidget)	
+	if(preWidget->id == hWidget)	
 	{
-		pObj->pWidget = preObj->pNext;	/* 从链表中删除 */
+		pWin->pWidget = preWidget->pNext;	/* 从链表中删除 */
 	}
 	else	/* 不是第一个 */
 	{
-		lstObj = preObj->pNext;
-		while(lstObj)
+		lstWidget = preWidget->pNext;
+		while(lstWidget)
 		{
-			if(lstObj->id == hWidget)
+			if(lstWidget->id == hWidget)
 			{
-				preObj->pNext = lstObj->pNext;
+				preWidget->pNext = lstWidget->pNext;
 				break;
 			}
-			preObj = lstObj;
-			lstObj = lstObj->pNext;
+			preWidget = lstWidget;
+			lstWidget = lstWidget->pNext;
 		}
 	}
 	
 	/* 如果找到了 */
-	if(lstObj)
+	if(lstWidget)
 	{
-		bsp_mem_Free(SRAMIN, lstObj->widgetData);	/* 释放控件数据 */
-		bsp_mem_Free(SRAMIN, lstObj);
+		gui_memFree(lstWidget);
 	}
 	
 	return ERR_NONE;
@@ -221,45 +201,35 @@ void widget_onPaint(struct WIDGET_OBJ *pWidget)
 {
 	if(!pWidget) return ;
 	int16_t err = ERR_NONE;
-	WIN_OBJ *pWin = win_getObject((pWidget->id >> 10), &err);
+	WIN_OBJ *pWin = win_getObject(GUI_GET_HPARENT(pWidget->id), &err);
 	
 	GUI_Context.drawRect.x0 = pWin->clientRect.x0;
 	GUI_Context.drawRect.y0 = pWin->clientRect.y0;
 	GUI_Context.drawRect.height = pWin->clientRect.height;
 	GUI_Context.drawRect.width = pWin->clientRect.width;
-	
+
 	/* 根据控件类型选择不同的绘制函数 */
 	switch(pWidget->type)
 	{
 		case WIDGET_BUTTON: 	/* 按钮 */
 		{
-			BUTTON_OBJ *pButton = (BUTTON_OBJ*)(pWidget->widgetData);	/* 得到按键结构体 */
-			button_onPaint(pButton);		/* 绘制按键 */
+			button_onPaint(pWidget->widgetData);		/* 绘制按键 */
 		}break;
 		case WIDGET_CHECKBOX:
 		{
-			CHECKBOX_OBJ *pCheckbox = (CHECKBOX_OBJ *)(pWidget->widgetData);
-			checkbox_onPaint(pCheckbox);
+			checkbox_onPaint(pWidget->widgetData);
 		}break;
 		case WIDGET_MENU:
 		{
-			MENU_OBJ *pMenu = (MENU_OBJ *)(pWidget->widgetData);
-			menu_onPaint(pMenu);
+			menu_onPaint(pWidget->widgetData);
 		}break;
 		case WIDGET_PROGBAR:
 		{
-			PROGBAR_OBJ *pProgbar = (PROGBAR_OBJ *)(pWidget->widgetData);
-			progbar_onPaint(pProgbar);
+			progbar_onPaint(pWidget->widgetData);
 		}break;
 		case WIDGET_SCROLLBAR:
 		{
-			SCROLLBAR_OBJ *pScrollbar = (SCROLLBAR_OBJ *)(pWidget->widgetData);
-			scrollbar_onPaint(pScrollbar);
-		}break;
-		case WIDGET_WINDOW:		/* window控件 */
-		{
-			WINDOW_OBJ *pWindow = (WINDOW_OBJ *)(pWidget->widgetData);
-			window_onPaint(pWindow);
+			scrollbar_onPaint(pWidget->widgetData);
 		}break;
 	}
 }

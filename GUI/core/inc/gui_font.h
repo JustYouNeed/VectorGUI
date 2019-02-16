@@ -16,6 +16,8 @@
 # ifndef __GUI_FONT_H
 # define __GUI_FONT_H
 
+# include "gui_com.h"
+
 /* ×ÖÌåÀàĞÍ */
 typedef enum
 {

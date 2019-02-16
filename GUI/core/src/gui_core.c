@@ -19,9 +19,15 @@
   *                              INCLUDE FILES
   *******************************************************************************************************
 */
-# include "gui.h"
+# include "gui_core.h"
+# include "gui_win.h"
 
 
+/*
+  *******************************************************************************************************
+  *                              LOCAL VARIABLE
+  *******************************************************************************************************
+*/
 GUI_CONTEXT GUI_Context;
 
 /*
@@ -59,7 +65,6 @@ void gui_gotoXY(uint16_t x, uint16_t y)
 void gui_Init(void)
 {
 	gui_deviceInit();
-//	wm_Init();
 	
 	GUI_Context.curFont = GUI_FONT_ASCII_6X8;
 	GUI_Context.dispPosX = 0;
@@ -92,27 +97,25 @@ void gui_clear(void)
 
 /*
 *********************************************************************************************************
-*                         gui_clearRect                 
+*                        gui_onPaint                  
 *
-* Description: 清除一块矩形区域
+* Description: GUI重绘函数
 *             
-* Arguments  : x0,y0: 矩形区域左上角点的坐标
-*							 width, height: 矩形区域长宽
+* Arguments  : None.
 *
 * Reutrn     : None.
 *
 * Note(s)    : None.
 *********************************************************************************************************
 */
-void gui_clearRect(uint16_t x0, uint16_t y0, uint16_t width, uint16_t height)
-{
-	gui_fillRectangle(x0, y0, x0 + width, y0 + height, 0);
-}
-
 void gui_onPaint()
 {
 	if(WIN_Desktop == NULL) return ;
 	WIDGET_OBJ *pWidget = NULL;
+	
+	
+	GUI_Context.drawRect.x0 = WIN_Desktop->rect.x0;
+	
 	/* 只绘制桌面 */
 	if(WIN_Desktop->isInvalid)	/* 只有在窗口无效的时候才需要绘制 */
 	{
@@ -122,7 +125,7 @@ void gui_onPaint()
 		while(pWidget)		/* 遍历该窗口的控件,并重绘 */
 		{
 			widget_onPaint(pWidget);
-			pWidget = (pWidget->pNext);	/* 获取下一个控件 */
+			pWidget = pWidget->pNext;	/* 获取下一个控件 */
 		}
 		WIN_Desktop->isInvalid = false;	/* 窗口设置为有效 */
 		gui_Refresh();	/* 更新屏幕 */
@@ -145,8 +148,9 @@ void gui_onPaint()
 void gui_excute(void)
 {
 //	gui_clear();
+	gui_onKey();
 	gui_onPaint();
-	msg_process();
+//	msg_process();
 //	gui_Refresh();	/* 更新屏幕 */
 }
 

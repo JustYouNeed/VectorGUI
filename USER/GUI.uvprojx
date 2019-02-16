@@ -7,7 +7,7 @@
 
   <Targets>
     <Target>
-      <TargetName>Remoter</TargetName>
+      <TargetName>GUI</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
       <pArmCC>5060300::V5.06 update 3 (build 300)::ARMCC</pArmCC>
@@ -550,11 +550,6 @@
               <FileType>1</FileType>
               <FilePath>..\BSP\src\bsp_oled.c</FilePath>
             </File>
-            <File>
-              <FileName>bsp_malloc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\BSP\src\bsp_malloc.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -626,34 +621,14 @@
               <FilePath>..\GUI\core\src\gui_basic.c</FilePath>
             </File>
             <File>
-              <FileName>gui_core.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\GUI\core\src\gui_core.c</FilePath>
-            </File>
-            <File>
               <FileName>gui_drv.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\GUI\core\src\gui_drv.c</FilePath>
             </File>
             <File>
-              <FileName>gui_font.c</FileName>
+              <FileName>gui_core.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\GUI\core\src\gui_font.c</FilePath>
-            </File>
-            <File>
-              <FileName>gui_widget.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\GUI\core\src\gui_widget.c</FilePath>
-            </File>
-            <File>
-              <FileName>gui_msg.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\GUI\core\src\gui_msg.c</FilePath>
-            </File>
-            <File>
-              <FileName>gui_mem.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\GUI\core\src\gui_mem.c</FilePath>
+              <FilePath>..\GUI\core\src\gui_core.c</FilePath>
             </File>
             <File>
               <FileName>gui_win.c</FileName>
@@ -661,9 +636,24 @@
               <FilePath>..\GUI\core\src\gui_win.c</FilePath>
             </File>
             <File>
+              <FileName>gui_widget.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\GUI\core\src\gui_widget.c</FilePath>
+            </File>
+            <File>
+              <FileName>gui_font.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\GUI\core\src\gui_font.c</FilePath>
+            </File>
+            <File>
               <FileName>gui_key.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\GUI\core\src\gui_key.c</FilePath>
+            </File>
+            <File>
+              <FileName>gui_mem.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\GUI\core\src\gui_mem.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -676,19 +666,24 @@
               <FilePath>..\GUI\widget\src\gui_button.c</FilePath>
             </File>
             <File>
+              <FileName>gui_checkbox.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\GUI\widget\src\gui_checkbox.c</FilePath>
+            </File>
+            <File>
+              <FileName>gui_iconview.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\GUI\widget\src\gui_iconview.c</FilePath>
+            </File>
+            <File>
+              <FileName>gui_list.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\GUI\widget\src\gui_list.c</FilePath>
+            </File>
+            <File>
               <FileName>gui_menu.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\GUI\widget\src\gui_menu.c</FilePath>
-            </File>
-            <File>
-              <FileName>gui_progbar.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\GUI\widget\src\gui_progbar.c</FilePath>
-            </File>
-            <File>
-              <FileName>gui_window.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\GUI\widget\src\gui_window.c</FilePath>
             </File>
             <File>
               <FileName>gui_scrollbar.c</FileName>
@@ -696,14 +691,14 @@
               <FilePath>..\GUI\widget\src\gui_scrollbar.c</FilePath>
             </File>
             <File>
-              <FileName>gui_checkbox.c</FileName>
+              <FileName>gui_progbar.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\GUI\widget\src\gui_checkbox.c</FilePath>
+              <FilePath>..\GUI\widget\src\gui_progbar.c</FilePath>
             </File>
             <File>
               <FileName>gui_text.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\GUI\core\src\gui_text.c</FilePath>
+              <FilePath>..\GUI\widget\src\gui_text.c</FilePath>
             </File>
           </Files>
         </Group>

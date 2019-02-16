@@ -16,13 +16,23 @@
 # ifndef __GUI_WIDGET_H
 # define __GUI_WIDGET_H
 
-# define WIDGET_HANDLE uint16_t
-# define GUI_GET_HPARENT(hwin) ((hwin >> 10) & 0x3f)
-# define GUI_GET_WIDGET_TYPE(hwin) ((hwin >> 6) & 0x0f)
-# define GUI_GET_HWIDGET(hwin) ((hwin >> 0) & 0x3f)
+# include "gui_com.h"
+# include "gui_key.h"
+
+# define WIDGET_Handle GUI_Handle
+
+/* 控件类型 */
+typedef enum
+{
+	WIDGET_BUTTON = 0x01,
+	WIDGET_MENU,
+	WIDGET_PROGBAR,
+	WIDGET_SCROLLBAR,
+	WIDGET_CHECKBOX,
+}WIDGET_TYPE;
 
 typedef struct WIDGET_OBJ WIDGET_OBJ;
-typedef void WIDGET_CALLBACK(WM_MESSAGE *pMsg);
+typedef void WIDGET_CALLBACK(WIDGET_Handle hWidget, GUI_KEY_INFO *pKey);
 
 #pragma pack(8) 
 /* 控件结构体 */
@@ -41,10 +51,10 @@ struct WIDGET_OBJ
 
 
 void widget_onPaint(struct WIDGET_OBJ *pWidget);
-WIDGET_OBJ *widget_getWidget(WIDGET_HANDLE hWidget, int16_t *err);
+WIDGET_OBJ *widget_getWidget(WIDGET_Handle hWidget, int16_t *err);
 void widget_sortList(WIN_Handle hParent);
-GUI_ERROR widget_Delete(WIDGET_HANDLE hWidget);
-WIDGET_HANDLE widget_Create(WIDGET_TYPE widgetType, void *pObj, uint8_t id, uint16_t actKey, WIDGET_CALLBACK *_cb, WIN_Handle hParent);
+GUI_ERROR widget_Delete(WIDGET_Handle hWidget);
+WIDGET_Handle widget_Create(WIDGET_TYPE widgetType, WIDGET_OBJ *pWidget, uint8_t id, uint16_t actKey, WIDGET_CALLBACK *_cb, WIN_Handle hParent);
 
 # endif
 

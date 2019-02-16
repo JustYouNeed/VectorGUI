@@ -16,9 +16,13 @@
 # ifndef __GUI_BUTTON_H
 # define __GUI_BUTTON_H
 
+# include "gui_com.h"
+# include "gui_key.h"
+# include "gui_font.h"
+
 # define BUTTON_Handle	uint16_t
 typedef struct BUTTON_OBJ BUTTON_OBJ;
-typedef void BUTTON_CALLBACK(WM_MESSAGE *pMsg);
+typedef void BUTTON_CALLBACK(GUI_KEY_INFO *pKey);
 
 #pragma pack (8)
 /* 按键结构体 */
@@ -27,6 +31,8 @@ struct BUTTON_OBJ
 	GUI_RECT rect;	/* 按键区域 */
 	uint8_t *title;	/* 按键标题 */
 	uint8_t isPress;	/* 按钮是否被按下 */
+	uint8_t preState, lstState;
+	
 	BUTTON_CALLBACK *_cb; /* 按钮回调函数 */
 	GUI_FONT font;		/* 按钮字体 */
 	GUI_TEXT_ALIGN textAlign;	/* 字体对齐方式 */

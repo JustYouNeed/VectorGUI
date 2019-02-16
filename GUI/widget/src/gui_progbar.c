@@ -22,7 +22,11 @@
   *                              INCLUDE FILES
   *******************************************************************************************************
 */
-# include "gui.h"
+# include "gui_progbar.h"
+# include "gui_widget.h"
+# include "gui_mem.h"
+# include "gui_win.h"
+# include "gui_core.h"
 
 /*
 *********************************************************************************************************
@@ -111,9 +115,17 @@ PROGBAR_Handle progbar_Create(uint16_t x, uint16_t y, uint16_t width, uint16_t h
 	
 	int16_t err = ERR_NONE;
 	PROGBAR_OBJ *pProgbar = NULL;
+	WIDGET_OBJ *pWidget = NULL;
+	uint8_t *pMem = NULL;
 	
-	pProgbar = (PROGBAR_OBJ *)bsp_mem_Alloc(SRAMIN, sizeof(PROGBAR_OBJ));
-	if(!pProgbar) return 0;
+	pMem = (uint8_t *)gui_memAlloc(sizeof(WIDGET_OBJ) + sizeof(PROGBAR_OBJ));
+	if(!pMem) return 0;
+	
+	pWidget = (WIDGET_OBJ *)pMem;
+	pProgbar = (PROGBAR_OBJ *)(pMem + sizeof(WIDGET_OBJ));
+	
+//	pProgbar = (PROGBAR_OBJ *)gui_memAlloc(sizeof(PROGBAR_OBJ));
+//	if(!pProgbar) return 0;
 	
 	pProgbar->x = x;
 	pProgbar->y = y;
@@ -121,8 +133,9 @@ PROGBAR_Handle progbar_Create(uint16_t x, uint16_t y, uint16_t width, uint16_t h
 	pProgbar->height = height;
 	pProgbar->ratio = 0;
 	
+	pWidget->widgetData = (void *)pProgbar;
 		/* 将菜单插入到控件列表中 */
-	err = widget_Create(WIDGET_PROGBAR, pProgbar, id, 0, NULL, hParent);
+	err = widget_Create(WIDGET_PROGBAR, pWidget, id, 0, NULL, hParent);
 	return err;
 }
 

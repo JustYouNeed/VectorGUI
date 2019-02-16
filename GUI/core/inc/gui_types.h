@@ -15,13 +15,46 @@
 # ifndef __GUI_TYPES_H
 # define __GUI_TYPES_H
 
-# define GUI_COLOR	uint8_t
+# include "math.h"
+# include "stdio.h"
+# include <stdint.h>
+# include "stdbool.h"
 
-# define FONT		const uint8_t 
+
+# ifndef uint8_t 
+	# define uint8_t unsigned char
+# endif
+
+# ifndef int8_t 
+	# define int8_t signed char
+# endif
+
+# ifndef uint16_t 
+	# define uint16_t unsigned short int
+# endif
+
+# ifndef int16_t 
+	# define int16_t signed short int
+# endif
+
+# ifndef uint32_t 
+	# define uint32_t unsigned int
+# endif
+	
+# ifndef int32_t 
+	# define int32_t signed int
+# endif
+
+# define GUI_COLOR	uint8_t
+# define FONT		const uint8_t
 # define GUI_EXTERN	extern
-# define TEXT_Handle	uint8_t
-# define WM_HWIN	int16_t 
-# define WIN_Handle	int8_t
+# define GUI_Handle	uint16_t
+# define WIN_Handle	GUI_Handle
+
+
+# define GUI_GET_HPARENT(hwin) ((hwin >> 10) & 0x3f)
+# define GUI_GET_WIDGET_TYPE(hwin) ((hwin >> 6) & 0x0f)
+# define GUI_GET_HWIDGET(hwin) ((hwin >> 0) & 0x3f)
 
 typedef enum
 {
@@ -45,18 +78,6 @@ typedef struct
 	uint16_t width, height;	/* 长宽 */
 }GUI_RECT;
 
-/* 控件类型 */
-typedef enum
-{
-	WIDGET_BUTTON = 0x01,
-	WIDGET_MENU = 0x02,
-	WIDGET_PROGBAR = 0x03,
-	WIDGET_SCROLLBAR = 0x04,
-	WIDGET_WINDOW = 0x05,
-	WIDGET_CHECKBOX = 0x06,
-}WIDGET_TYPE;
-
-
 /* 文本对齐方式 */
 typedef enum
 {
@@ -67,15 +88,6 @@ typedef enum
 	GUI_TA_VCENTER = 0x01<<4,
 	GUI_TA_BOTTOM = 0x01<<5,
 }GUI_TEXT_ALIGN;
-
-
-
-
-
-
-
-
-
 
 # endif 
 /********************************************  END OF FILE  *******************************************/

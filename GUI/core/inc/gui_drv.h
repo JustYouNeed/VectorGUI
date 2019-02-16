@@ -15,6 +15,13 @@
 # ifndef __GUI_DRV_H
 # define __GUI_DRV_H
 
+/*
+  *******************************************************************************************************
+  *                              INCLUDE FILES
+  *******************************************************************************************************
+*/
+# include "gui_com.h"
+
 void gui_deviceInit(void);
 void gui_fillSCR(GUI_COLOR color);
 void gui_clearSCR(void);
@@ -24,9 +31,6 @@ uint8_t gui_readPoint(uint8_t x, uint8_t y);
 
 void gui_Refresh(void);
 
-void gui_keyInput(void);
-
 # endif
-
 /********************************************  END OF FILE  *******************************************/
 

@@ -22,7 +22,38 @@
   *                              INCLUDE FILES
   *******************************************************************************************************
 */
-# include "gui.h"
+# include "gui_widget.h"
+# include "gui_button.h"
+# include "gui_font.h"
+# include "gui_text.h"
+# include "gui_win.h"
+# include "gui_mem.h"
+# include "gui_core.h"
+
+/*
+*********************************************************************************************************
+*                        buttonbutton_getObject                  
+*
+* Description: 获取按钮控制结构体
+*             
+* Arguments  : hButton: 按钮句柄
+*						   *pButton: 按钮结构体指针
+*
+* Reutrn     : 执行结果
+*
+* Note(s)    : 本文件私有函数
+*********************************************************************************************************
+*/
+static BUTTON_OBJ *button_getObject(BUTTON_Handle hButton, int16_t *err)
+{
+	WIDGET_OBJ *pWidget = NULL;
+	
+		/* 获取按钮控件 */
+	pWidget = widget_getWidget(hButton, err);	
+	if(*err) return NULL;
+	
+	return (BUTTON_OBJ *)(pWidget->widgetData);
+}
 
 /*
 *********************************************************************************************************
@@ -98,52 +129,6 @@ void button_onPaint(BUTTON_OBJ *pButton)
 }
 
 
-/*
-*********************************************************************************************************
-*                            _delete              
-*
-* Description: 
-*             
-* Arguments  : 
-*
-* Reutrn     : 
-*
-* Note(s)    : 
-*********************************************************************************************************
-*/
-static void _delete(BUTTON_Handle hButton)
-{	
-	widget_Delete(hButton);
-}
-
-/*
-*********************************************************************************************************
-*                        button_getButtonObj                  
-*
-* Description: 获取按钮控制结构体
-*             
-* Arguments  : hButton: 按钮句柄
-*						   *pButton: 按钮结构体指针
-*
-* Reutrn     : 执行结果
-*
-* Note(s)    : 本文件私有函数
-*********************************************************************************************************
-*/
-static BUTTON_OBJ *_getButtonObj(BUTTON_Handle hButton, int16_t *err)
-{
-	WIDGET_OBJ *pObj = NULL;
-	
-		/* 获取按钮控件 */
-	pObj = widget_getWidget(hButton, err);	
-	if(!pObj) 
-	{
-		*err = ERR_PARA;
-		return NULL;
-	}
-	
-	return (BUTTON_OBJ *)(pObj->widgetData);
-}
 
 /*
 *********************************************************************************************************
@@ -158,47 +143,37 @@ static BUTTON_OBJ *_getButtonObj(BUTTON_Handle hButton, int16_t *err)
 * Note(s)    : None.
 *********************************************************************************************************
 */
-static void button_defaultProc(WM_MESSAGE *pMsg)
+static void button_defaultProc(BUTTON_Handle hButton, GUI_KEY_INFO *pKey)
 {
-	BUTTON_Handle hObj = 0;
 	BUTTON_OBJ *pButton = NULL;
-	WIDGET_OBJ *pWidget = NULL;
 	int16_t err = ERR_NONE;
 	
-	hObj = pMsg->hWin; /* 得到按钮句柄 */
-	
 	/* 得到按钮控件结构体 */
-	pWidget = widget_getWidget(hObj, &err); 
-	pButton = (BUTTON_OBJ *)(pWidget->widgetData);
+	pButton = button_getObject(hButton, &err);
+	if(err) return ;
 	
-	/* 根据不同的消息进行不同的处理 */
-	switch(pMsg->msgId)
+	/* 设置按钮状态 */
+	if(pKey->keyStatus == GUI_KEY_PRESS)
 	{
-		case MSG_CREATE: break;
-		case MSG_KEY: 	/* 按键消息 */
-		{
-			/* 得到按键消息 */
-			MSG_KEY_INFO *key = (MSG_KEY_INFO *)&(pMsg->key);
-			
-			/* 如果该按键在控件的响应按键里面则响应 */
-			if(key->keyValue & pWidget->actKey)
-			{
-				if(key->keyStatus == KEY_PRESS) /* 如果按键按下了 */
-					pButton->isPress = true; 
-				else if(key->keyStatus == KEY_RELEASED)	/* 按键释放了 */
-					pButton->isPress = false;
-				
-				/* 绘制按钮按下的状态 */
-				win_Invalidation(pWidget->id >> 10);
-				gui_onPaint();
-				if(pButton->_cb) pButton->_cb(pMsg);
-			}
-		}break;
-		case MSG_DELETE:	/* 删除按键消息 */
-		{
-			_delete(hObj);
-		}break;
+		pButton->isPress = true; 
 	}
+	else if(pKey->keyStatus == GUI_KEY_RELEASED)
+	{
+		pButton->isPress = false;
+	}
+	
+	/* 只有按钮状态改变了才需要重绘 */
+	pButton->lstState = pButton->isPress;
+	if(pButton->lstState != pButton->preState)
+	{
+		/* 绘制按钮按下的状态 */
+		win_Invalidation(WIN_Desktop->hWin);
+//		gui_onPaint();
+	}
+	pButton->preState = pButton->lstState;
+	
+	/* 存在回调函数的话执行回调函数 */
+	if(pButton->_cb) pButton->_cb(pKey);
 }
 
 /*
@@ -221,8 +196,8 @@ void button_setCallback(BUTTON_Handle hButton, BUTTON_CALLBACK *_cb)
 	int16_t err = ERR_NONE;
 	if(!hButton) return ;
 	
-	pButton = _getButtonObj(hButton, &err);
-	if(!pButton) return ;
+	pButton = button_getObject(hButton, &err);
+	if(err) return ;
 	
 	pButton->_cb = _cb;
 }
@@ -248,7 +223,7 @@ GUI_FONT button_getFont(BUTTON_Handle hButton)
 	
 	pWidget = widget_getWidget(hButton, &err);	/* 读取该控件的结构体 */
 	
-	if(!pWidget) return 0;
+	if(err) return (GUI_FONT)0;
 	
 	pButton = (BUTTON_OBJ*)pWidget->widgetData;
 	
@@ -275,7 +250,7 @@ GUI_ERROR button_setFont(BUTTON_Handle hButton, GUI_FONT font)
 	BUTTON_OBJ *pButton = NULL;
 	int16_t err = ERR_NONE;
 	
-	pButton = _getButtonObj(hButton, &err);
+	pButton = button_getObject(hButton, &err);
 	pButton->font = font;
 	
 	return ERR_NONE;
@@ -303,7 +278,9 @@ GUI_ERROR button_getText(BUTTON_Handle hButton, uint8_t *pText, uint16_t textLen
 	BUTTON_OBJ *pButton = NULL;
 	int16_t err = ERR_NONE;
 	
-	pButton = _getButtonObj(hButton, &err);
+	pButton = button_getObject(hButton, &err);
+	if(err) return (GUI_ERROR)err;
+	
 	pText = pButton->title;
 	
 	return ERR_NONE;
@@ -330,10 +307,10 @@ GUI_ERROR button_setText(BUTTON_Handle hButton, const uint8_t *pText)
 	BUTTON_OBJ *pButton = NULL;
 	int16_t err = ERR_NONE;
 	
-	pButton = _getButtonObj(hButton, &err);
+	pButton = button_getObject(hButton, &err);
 	pButton->title = (uint8_t *)pText;
 	
-	msg_sendMsgNoData(hButton, MSG_PAINT);
+	win_Invalidation(hButton >> 10);
 	
 	return ERR_NONE;
 }
@@ -395,12 +372,17 @@ GUI_ERROR button_getTextAlign(BUTTON_Handle hButton)
 BUTTON_Handle button_Create(uint16_t x0, uint16_t y0, uint16_t width, uint16_t height, uint16_t id, uint8_t *title, uint16_t actKey, WIN_Handle hParent)
 {
 	int16_t r = 0;
-	BUTTON_OBJ *pButton;
+	uint8_t *pMem = NULL;
+	BUTTON_OBJ *pButton = NULL;
+	WIDGET_OBJ *pWidget = NULL;
 	
 	if(!hParent) return 0;	/* 按键必须有父窗口 */
 	
-	pButton = (BUTTON_OBJ*)bsp_mem_Alloc(SRAMIN, sizeof(BUTTON_OBJ));	/* 为按键申请内存 */
-	if(!pButton) return 0;	/* 内存申请失败 */
+	pMem = (uint8_t *)gui_memAlloc(sizeof(BUTTON_OBJ) + sizeof(WIDGET_OBJ));	/* 为按键申请内存 */
+	if(!pMem) return 0;	/* 内存申请失败 */
+	
+	pWidget = (WIDGET_OBJ *)pMem;
+	pButton = (BUTTON_OBJ *)(pMem + sizeof(WIDGET_OBJ));
 	
 	/* 设置按钮参数 */
 	pButton->rect.x0 = x0;
@@ -411,8 +393,11 @@ BUTTON_Handle button_Create(uint16_t x0, uint16_t y0, uint16_t width, uint16_t h
 	pButton->title = title;
 	pButton->_cb = NULL;
 	pButton->textAlign = GUI_TA_HCENTER | GUI_TA_VCENTER;
+	pButton->lstState = false;
+	pButton->preState = false;
 	
-	r = widget_Create(WIDGET_BUTTON, pButton, id, actKey, button_defaultProc, hParent);
+	pWidget->widgetData = (void *)pButton;
+	r = widget_Create(WIDGET_BUTTON, pWidget, id, actKey, button_defaultProc, hParent);
 	
 //	msg_sendMsgNoData(r, MSG_PAINT);	/* 创建完成后发送一个重绘消息 */
 	return r;
@@ -438,7 +423,7 @@ BUTTON_Handle button_CreateEx(BUTTON_OBJ *pButton, uint8_t id, uint16_t actKey, 
 {
 	if(!hParent) return 0;
 	
-	return widget_Create(WIDGET_BUTTON, pButton, id, actKey, button_defaultProc, hParent);
+//	return widget_Create(WIDGET_BUTTON, pButton, id, actKey, button_defaultProc, hParent);
 }
 
 /*
@@ -458,7 +443,9 @@ GUI_ERROR button_Delete(BUTTON_Handle *hButton)
 {
 	if(!*hButton) return ERR_PARA; /* 参数错误 */
 	
-	msg_sendMsgNoData(*hButton, MSG_DELETE);
+	widget_Delete(*hButton);
 	*hButton = 0;
+	
+	return ERR_NONE;
 }
 /********************************************  END OF FILE  *******************************************/

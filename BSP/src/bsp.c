@@ -39,7 +39,7 @@ void bsp_Init(void)
 {		
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 	bsp_tim_Init();
-	bsp_mem_Init();
+//	bsp_mem_Init();
 //	bsp_uart_Init();
 	bsp_led_Init();
 	bsp_key_Init();

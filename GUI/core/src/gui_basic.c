@@ -22,7 +22,7 @@
   *                              INCLUDE FILES
   *******************************************************************************************************
 */
-# include "gui.h"
+# include "gui_basic.h"
 
 
 # if (GUI_DRAW_LINE_BRESE > 0u)
@@ -751,6 +751,25 @@ void gui_fillRectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, GUI_C
 
 /*
 *********************************************************************************************************
+*                         gui_clearRect                 
+*
+* Description: 清除一块矩形区域
+*             
+* Arguments  : x0,y0: 矩形区域左上角点的坐标
+*							 width, height: 矩形区域长宽
+*
+* Reutrn     : None.
+*
+* Note(s)    : None.
+*********************************************************************************************************
+*/
+void gui_clearRect(uint16_t x0, uint16_t y0, uint16_t width, uint16_t height)
+{
+	gui_fillRectangle(x0, y0, x0 + width, y0 + height, 0);
+}
+
+/*
+*********************************************************************************************************
 *                     gui_drawSquare                     
 *
 * Description: 画正方形
@@ -767,9 +786,9 @@ void gui_fillRectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, GUI_C
 void gui_drawSquare(uint16_t x0, uint16_t y0, uint16_t sideLen, GUI_COLOR color)
 {
 	/* 判断数据是否有效 */
-	if(x0 > LCD_X || y0 > LCD_Y) return;
-	if((x0 + sideLen) > LCD_X) return;
-	if((y0 + sideLen) > LCD_Y) return;
+	if(x0 > LCD_MAX_X || y0 > LCD_MAX_Y) return;
+	if((x0 + sideLen) > LCD_MAX_X) return;
+	if((y0 + sideLen) > LCD_MAX_Y) return;
 	
 	/* 边长为0则画点 */
 	if(sideLen == 0) gui_drawPoint(x0, y0, color);
@@ -795,9 +814,9 @@ void gui_drawSquare(uint16_t x0, uint16_t y0, uint16_t sideLen, GUI_COLOR color)
 void gui_fillSquare(uint16_t x0, uint16_t y0, uint16_t sideLen, GUI_COLOR color)
 {
 	/* 判断数据是否有效 */
-	if(x0 > LCD_X || y0 > LCD_Y) return;
-	if((x0 + sideLen) > LCD_X) return;
-	if((y0 + sideLen) > LCD_Y) return;
+	if(x0 > LCD_MAX_X || y0 > LCD_MAX_Y) return;
+	if((x0 + sideLen) > LCD_MAX_X) return;
+	if((y0 + sideLen) > LCD_MAX_Y) return;
 	
 	/* 边长为0则画点 */
 	if(sideLen == 0) gui_drawPoint(x0, y0, color);
@@ -972,7 +991,7 @@ void gui_fillCircle(uint16_t x, uint16_t y, uint16_t radius, GUI_COLOR color)
 	/* 计算出4个特殊点(0、90、180、270度)，进行显示 */
 	draw_x0 = draw_x1 = x;
 	draw_y0 = draw_y1 = y + radius;
-	if(draw_y0<LCD_Y)
+	if(draw_y0<LCD_MAX_Y)
 		gui_drawPoint(draw_x0, draw_y0, color);	// 90度
 
 	draw_x2 = draw_x3 = x;
@@ -982,13 +1001,13 @@ void gui_fillCircle(uint16_t x, uint16_t y, uint16_t radius, GUI_COLOR color)
 
 	draw_x4 = draw_x6 = x + radius;
 	draw_y4 = draw_y6 = y;
-	if(draw_x4<LCD_X) 
+	if(draw_x4<LCD_MAX_X) 
 	{  
 		gui_drawPoint(draw_x4, draw_y4, color);	// 0度
 		fill_x1 = draw_x4;
 	}
 	else
-		fill_x1 = LCD_X;
+		fill_x1 = LCD_MAX_X;
 	
 	fill_y0 = y;							// 设置填充线条起始点fill_x0
 	fill_x0 = x - radius;						// 设置填充线条结束点fill_y1
@@ -1035,7 +1054,7 @@ void gui_fillCircle(uint16_t x, uint16_t y, uint16_t radius, GUI_COLOR color)
 		draw_y7--;
 		
 		/* 要判断当前点是否在有效范围内 */
-		if( (draw_x0<=LCD_X)&&(draw_y0>=0) )	
+		if( (draw_x0<=LCD_MAX_X)&&(draw_y0>=0) )	
 			gui_drawPoint(draw_x0, draw_y0, color);
 
 		if( (draw_x1>=0)&&(draw_y1>=0) )	
@@ -1047,18 +1066,18 @@ void gui_fillCircle(uint16_t x, uint16_t y, uint16_t radius, GUI_COLOR color)
 			fill_x0 = draw_x1;
 			/* 设置填充线条起始点fill_y0 */
 			fill_y0 = draw_y1;
-			if(fill_y0>LCD_Y) fill_y0 = LCD_Y;
+			if(fill_y0>LCD_MAX_Y) fill_y0 = LCD_MAX_Y;
 			if(fill_y0<0) fill_y0 = 0; 
 			/* 设置填充线条结束点fill_x1 */									
 			fill_x1 = x*2 - draw_x1;				
-			if(fill_x1>LCD_X) fill_x1 = LCD_X;
+			if(fill_x1>LCD_MAX_X) fill_x1 = LCD_MAX_X;
 			gui_drawHLine(fill_x0, fill_y0, fill_x1, color);
 		}
 	  
-		if( (draw_x2<=LCD_X)&&(draw_y2<=LCD_Y) )	
+		if( (draw_x2<=LCD_MAX_X)&&(draw_y2<=LCD_MAX_Y) )	
 			gui_drawPoint(draw_x2, draw_y2, color);   
 		  
-		if( (draw_x3>=0)&&(draw_y3<=LCD_Y) )	
+		if( (draw_x3>=0)&&(draw_y3<=LCD_MAX_Y) )	
 			gui_drawPoint(draw_x3, draw_y3, color);
 	  
 		/* 第四点垂直线填充(上半圆的点) */
@@ -1067,14 +1086,14 @@ void gui_fillCircle(uint16_t x, uint16_t y, uint16_t radius, GUI_COLOR color)
 			fill_x0 = draw_x3;
 			/* 设置填充线条起始点fill_y0 */
 			fill_y0 = draw_y3;
-			if(fill_y0>LCD_Y) fill_y0 = LCD_Y;
+			if(fill_y0>LCD_MAX_Y) fill_y0 = LCD_MAX_Y;
 			if(fill_y0<0) fill_y0 = 0;
 			/* 设置填充线条结束点fill_x1 */									
 			fill_x1 = x*2 - draw_x3;				
-			if(fill_x1>LCD_X) fill_x1 = LCD_X;
+			if(fill_x1>LCD_MAX_X) fill_x1 = LCD_MAX_X;
 			gui_drawHLine(fill_x0, fill_y0, fill_x1, color);
 		}	 
-		if( (draw_x4<=LCD_X)&&(draw_y4>=0) )	
+		if( (draw_x4<=LCD_MAX_X)&&(draw_y4>=0) )	
 			gui_drawPoint(draw_x4, draw_y4, color);
 
 		if( (draw_x5>=0)&&(draw_y5>=0) )	
@@ -1086,17 +1105,17 @@ void gui_fillCircle(uint16_t x, uint16_t y, uint16_t radius, GUI_COLOR color)
 			fill_x0 = draw_x5;
 			/* 设置填充线条起始点fill_y0 */
 			fill_y0 = draw_y5;
-			if(fill_y0>LCD_Y) fill_y0 = LCD_Y;
+			if(fill_y0>LCD_MAX_Y) fill_y0 = LCD_MAX_Y;
 			if(fill_y0<0) fill_y0 = 0;
 			/* 设置填充线条结束点fill_x1 */									
 			fill_x1 = x*2 - draw_x5;				
-			if(fill_x1>LCD_X) fill_x1 = LCD_X;
+			if(fill_x1>LCD_MAX_X) fill_x1 = LCD_MAX_X;
 			gui_drawHLine(fill_x0, fill_y0, fill_x1, color);
 		}
 
-		if( (draw_x6<=LCD_X)&&(draw_y6<=LCD_Y) )	
+		if( (draw_x6<=LCD_MAX_X)&&(draw_y6<=LCD_MAX_Y) )	
 			gui_drawPoint(draw_x6, draw_y6, color);
-		if( (draw_x7>=0)&&(draw_y7<=LCD_Y) )	
+		if( (draw_x7>=0)&&(draw_y7<=LCD_MAX_Y) )	
 			gui_drawPoint(draw_x7, draw_y7, color);
 
 		/* 第八点垂直线填充(上半圆的点) */
@@ -1105,11 +1124,11 @@ void gui_fillCircle(uint16_t x, uint16_t y, uint16_t radius, GUI_COLOR color)
 			fill_x0 = draw_x7;
 			/* 设置填充线条起始点fill_y0 */
 			fill_y0 = draw_y7;
-			if(fill_y0>LCD_Y) fill_y0 = LCD_Y;
+			if(fill_y0>LCD_MAX_Y) fill_y0 = LCD_MAX_Y;
 			if(fill_y0<0) fill_y0 = 0;
 			/* 设置填充线条结束点fill_x1 */									
 			fill_x1 = x*2 - draw_x7;				
-			if(fill_x1>LCD_X) fill_x1 = LCD_X;
+			if(fill_x1>LCD_MAX_X) fill_x1 = LCD_MAX_X;
 			gui_drawHLine(fill_x0, fill_y0, fill_x1, color);
 		}
 	}

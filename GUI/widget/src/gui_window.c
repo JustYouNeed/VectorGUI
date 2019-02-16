@@ -22,7 +22,7 @@
   *                              INCLUDE FILES
   *******************************************************************************************************
 */
-# include "gui.h"
+# include "gui_com.h"
 
 void window_onPaint(const WINDOW_OBJ *pWindow)
 {

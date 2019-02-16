@@ -15,8 +15,10 @@
 # ifndef __GUI_MEM_H
 # define __GUI_MEM_H
 
+# include "gui_com.h"
 
-
+void *gui_memAlloc(uint32_t size);
+void gui_memFree(void *memAddr);
 # endif
 /********************************************  END OF FILE  *******************************************/
 

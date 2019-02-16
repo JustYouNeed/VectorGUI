@@ -18,7 +18,11 @@
   *                              INCLUDE FILES
   *******************************************************************************************************
 */
-# include "gui.h"
+# include "gui_menu.h"
+# include "gui_widget.h"
+# include "gui_mem.h"
+# include "gui_win.h"
+# include "gui_core.h"
 
 /*
 *********************************************************************************************************
@@ -53,80 +57,54 @@ MENU_OBJ *menu_getObject(MENU_Handle hMenu, int16_t *err)
 
 /*
 *********************************************************************************************************
-*                                          
+*                      menu_defaultProc                    
 *
-* Description: 
+* Description: 菜单控件默认处理函数
 *             
-* Arguments  : 
+* Arguments  : hMenu: 菜单句柄
+*							 *pKey: 按键消息
 *
-* Reutrn     : 
+* Reutrn     : None.
 *
-* Note(s)    : 
+* Note(s)    : 本文件私有函数，只能由GUI调用，用户不能使用
 *********************************************************************************************************
 */
-static void menu_defaultProc(WM_MESSAGE *pMsg)
+static void menu_defaultProc(MENU_Handle hMenu, GUI_KEY_INFO *pKey)
 {
-	MENU_OBJ *pMenu = NULL;
-	MENUNODE_OBJ *pNode = NULL;
-	WIDGET_OBJ *pWidget = NULL;
-	MENU_Handle hMenu = 0;
 	int16_t err = ERR_NONE;
+	MENU_OBJ *pMenu = NULL;
 	
-	hMenu = pMsg->hWin;
+	pMenu = menu_getObject(hMenu, &err);
+	if(err) return ;
 	
-	/* 得到按钮控件结构体 */
-	pWidget = widget_getWidget(hMenu, &err); 
-	if(err != ERR_NONE) return;
-	pMenu = (MENU_OBJ *)(pWidget->widgetData);
-	
-	switch(pMsg->msgId)
+	/* 按键被按下 */
+	if(GUI_KEY_PRESS == pKey->keyStatus)
 	{
-		case MSG_KEY:
+		/* 菜单上移 */
+		if(pKey->keyValue == GUI_KEY_UP)
 		{
-			/* 得到按键消息 */
-			MSG_KEY_INFO *key = (MSG_KEY_INFO *)&(pMsg->key);
-			
-			/* 按键被按下 */
-			if(KEY_PRESS == key->keyStatus)
+			if(pMenu->selMenu->preNode) /* 在前面还有结点的时候往前移 */
 			{
-				/* 菜单上移 */
-				if(key->keyValue == MSG_KEY_UP)
-				{
-					if(pMenu->selMenu->preNode) /* 在前面还有结点的时候往前移 */
-					{
-						pMenu->selMenu = pMenu->selMenu->preNode;
-						pMenu->selNo --;
-//						if(pMenu->selNo <= -5)
-//						{
-//							pMenu->selNo = 0;
-//							pMenu->headMenu = pMenu->headMenu->preNode;
-//						}
-						win_Invalidation(pWidget->id >> 10); /* 立刻重绘一遍 */
-						gui_onPaint();
-					}
-				}
-				else if(key->keyValue == MSG_KEY_DOWN)
-				{
-					if(pMenu->selMenu->lstNode) /* 菜单下移 */
-					{
-						pMenu->selMenu = pMenu->selMenu->lstNode;
-						pMenu->selNo ++;
-//						if(pMenu->selNo >= 5)
-//						{
-//							pMenu->selNo = 0;
-//							pMenu->headMenu = pMenu->headMenu->lstNode;
-//						}
-						win_Invalidation(pWidget->id >> 10);
-						gui_onPaint();
-					}
-				}else if(key->keyValue == MSG_KEY_PWR) /* 执行回调 */
-				{
-					if(pMenu->selMenu->_cb)
-						pMenu->selMenu->_cb(pMsg);
-				}
+				pMenu->selMenu = pMenu->selMenu->preNode;
+				pMenu->selNo --;
+				win_Invalidation(GUI_GET_HPARENT(hMenu)); /* 立刻重绘一遍 */
+//				gui_onPaint();
 			}
-		}break;
-		default: break;
+		}
+		else if(pKey->keyValue == GUI_KEY_DOWN)
+		{
+			if(pMenu->selMenu->lstNode) /* 菜单下移 */
+			{
+				pMenu->selMenu = pMenu->selMenu->lstNode;
+				pMenu->selNo ++;
+				win_Invalidation(GUI_GET_HPARENT(hMenu));
+//				gui_onPaint();
+			}
+		}else if(pKey->keyValue == GUI_KEY_PWR) /* 执行回调 */
+		{
+			if(pMenu->selMenu->_cb)
+				pMenu->selMenu->_cb();
+		}
 	}
 }
 
@@ -172,7 +150,7 @@ void menu_onPaint(MENU_OBJ* pMenu)
 		pNode = pNode->lstNode;
 		
 		y += 10;
-		if(y > LCD_Y) break; /* 超过屏幕的部分不需要显示 */
+		if(y > LCD_MAX_Y) break; /* 超过屏幕的部分不需要显示 */
 	}
 }
 
@@ -195,11 +173,19 @@ MENU_Handle menu_Create(uint16_t x0, uint16_t y0, uint16_t width, uint8_t id, WI
 {
 	int16_t err = ERR_NONE;
 	MENU_OBJ *pMenu = NULL;
+	WIDGET_OBJ *pWidget = NULL;
+	uint8_t *pMem = NULL;
 	
 	if(!hParent) return ERR_PARA;
 	
-	pMenu = (MENU_OBJ *)bsp_mem_Alloc(SRAMIN, sizeof(MENU_OBJ));
-	if(!pMenu) return ERR_MEM;
+	pMem = (uint8_t *)gui_memAlloc(sizeof(WIDGET_OBJ) + sizeof(MENU_OBJ));
+	if(!pMem) return 0;
+	
+	pWidget = (WIDGET_OBJ *)pMem;
+	pMenu = (MENU_OBJ *)(pMem + sizeof(WIDGET_OBJ));
+	
+//	pMenu = (MENU_OBJ *)gui_memAlloc(sizeof(MENU_OBJ));
+//	if(!pMenu) return ERR_MEM;
 	
 	/* 设置菜单的位置 */
 	pMenu->rect.x0 = x0;
@@ -214,8 +200,10 @@ MENU_Handle menu_Create(uint16_t x0, uint16_t y0, uint16_t width, uint8_t id, WI
 	pMenu->numOfMenus = 0;
 	pMenu->selNo = 0;
 	
+	pWidget->widgetData = (void *)pMenu;
+	
 	/* 将菜单插入到控件列表中 */
-	err = widget_Create(WIDGET_MENU, pMenu, id, MSG_KEY_UP | MSG_KEY_DOWN | MSG_KEY_PWR, menu_defaultProc, hParent);
+	err = widget_Create(WIDGET_MENU, pWidget, id, GUI_KEY_UP | GUI_KEY_DOWN | GUI_KEY_PWR, menu_defaultProc, hParent);
 	return err;
 }
 
@@ -248,7 +236,7 @@ GUI_ERROR menu_Delete(MENU_Handle *hMenu)
 	
 	while(preNode)
 	{
-		bsp_mem_Free(SRAMIN, preNode);
+		gui_memFree(preNode);
 		preNode = preNode->lstNode;
 	}
 	
@@ -279,7 +267,7 @@ GUI_ERROR menu_insertItem(MENU_Handle hMenu, uint8_t *text, MENU_CALLBACK *_cb)
 	MENU_OBJ *pMenu = NULL;
 	
 	/* 为菜单结点申请内存 */
-	pMenuNode = (MENUNODE_OBJ *)bsp_mem_Alloc(SRAMIN, sizeof(MENUNODE_OBJ));
+	pMenuNode = (MENUNODE_OBJ *)gui_memAlloc(sizeof(MENUNODE_OBJ));
 	if(!pMenuNode) return ERR_MEM;
 	
 	pMenuNode->isSelect = false;
@@ -329,7 +317,7 @@ GUI_ERROR menu_insertItem(MENU_Handle hMenu, uint8_t *text, MENU_CALLBACK *_cb)
 GUI_ERROR menu_deleteItem(MENU_Handle hMenu, uint8_t itemId)
 {
 	/* 参数错误 */
-	if(!hMenu || itemId < 0) return ERR_PARA;
+	if(!hMenu) return ERR_PARA;
 	
 	int16_t err = ERR_NONE;
 	MENU_OBJ *pMenu = NULL;
@@ -368,7 +356,7 @@ GUI_ERROR menu_deleteItem(MENU_Handle hMenu, uint8_t itemId)
 	{
 		preNode->lstNode = lstNode->lstNode;
 		lstNode->lstNode->preNode = preNode;
-		bsp_mem_Free(SRAMIN, lstNode);
+		gui_memFree(lstNode);
 	}
 	else
 		return ERR_PARA;

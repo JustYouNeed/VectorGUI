@@ -19,7 +19,7 @@
     *                              INCLUDE FILES
     *******************************************************************************************************
   */	
-#include "font.h" 
+//#include "font.h" 
 #include "bsp.h" 	 
 
 
@@ -239,6 +239,7 @@ void bsp_oled_DrawPoint(uint8_t x,uint8_t y,uint8_t t)
 	pos=7-y/8;
 	bx=y%8;
 	temp=1<<(7-bx);
+
 	if(t)oledGram[x][pos]|=temp;
 	else oledGram[x][pos]&=~temp;	    
 }

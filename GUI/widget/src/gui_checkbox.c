@@ -18,7 +18,11 @@
   *                              INCLUDE FILES
   *******************************************************************************************************
 */
-# include "gui.h"
+# include "gui_checkbox.h"
+# include "gui_widget.h"
+# include "gui_mem.h"
+# include "gui_core.h"
+# include "gui_win.h"
 
 /*
 *********************************************************************************************************
@@ -58,14 +62,21 @@ void checkbox_onPaint(const CHECKBOX_OBJ *pCheckbox)
 CHECKBOX_Handle  checkbox_Create(uint16_t x0, uint16_t y0, uint8_t *text, uint16_t id, WIN_Handle hParent)
 {
 	CHECKBOX_OBJ *pCheckbox = NULL;
+	WIDGET_OBJ *pWidget = NULL;
+	uint8_t *pMem = NULL;
 	int16_t r;
-	pCheckbox = (CHECKBOX_OBJ *)bsp_mem_Alloc(SRAMIN, sizeof(CHECKBOX_OBJ));
-	if(!pCheckbox) return 0;
+	
+	pMem = (uint8_t *)gui_memAlloc(sizeof(CHECKBOX_OBJ) + sizeof(WIDGET_OBJ));
+	if(!pMem) return 0;
+	
+	pWidget = (WIDGET_OBJ *)pMem;
+	pCheckbox = (CHECKBOX_OBJ *)(pMem + sizeof(CHECKBOX_OBJ));
 	
 	pCheckbox->rect.x0 = x0;
 	pCheckbox->rect.y0 = y0;
 	
-	r = widget_Create(WIDGET_CHECKBOX, pCheckbox, id, MSG_KEY_DOWN , NULL, hParent);	
+	pWidget->widgetData = (void *)pCheckbox;
+	r = widget_Create(WIDGET_CHECKBOX, pWidget, id, GUI_KEY_NULL , NULL, hParent);	
 	
 	return r;
 }

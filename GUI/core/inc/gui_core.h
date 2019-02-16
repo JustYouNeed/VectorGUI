@@ -16,6 +16,9 @@
 # ifndef __GUI_CORE_H
 # define __GUI_CORE_H 
 
+# include "gui_com.h"
+# include "gui_font.h"
+
 /* GUI上下文结构体，保存GUI信息 */
 typedef struct
 {
@@ -31,11 +34,9 @@ void gui_Init(void);
 void gui_onPaint(void);
 void gui_clear(void);
 void gui_excute(void);
-void gui_clearRect(uint16_t x0, uint16_t y0, uint16_t width, uint16_t height);
 void gui_gotoXY(uint16_t x, uint16_t y);
 
-
+extern GUI_CONTEXT GUI_Context;
 # endif
-
 /********************************************  END OF FILE  *******************************************/
 

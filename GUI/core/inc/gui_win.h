@@ -16,7 +16,8 @@
 # ifndef __GUI_WIN_H_
 # define __GUI_WIN_H_
 
-
+# include "gui_com.h"
+# include "gui_widget.h"
 
 typedef struct WIN_OBJ WIN_OBJ;
 typedef enum
@@ -50,6 +51,8 @@ WIN_OBJ *win_getObject(WIN_Handle hWin, int16_t *err);
 int16_t win_boringToTop(WIN_Handle hWin);
 void win_Invalidation(WIN_Handle hWin);
 void win_onPaint(const WIN_OBJ *pWin);
+
+extern WIN_OBJ *WIN_Desktop;
 # endif
 /********************************************  END OF FILE  *******************************************/
 
